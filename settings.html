@@ -319,12 +319,11 @@
         if (saveDebounceTimer) { clearTimeout(saveDebounceTimer); saveDebounceTimer = null; }
         if (ipcRenderer) ipcRenderer.send('pet-config-changed', cfg);
       } else {
-        if (!saveDebounceTimer) {
-          saveDebounceTimer = setTimeout(() => {
-            saveDebounceTimer = null;
-            if (ipcRenderer) ipcRenderer.send('pet-config-changed', cfg);
-          }, 250);
-        }
+        if (saveDebounceTimer) clearTimeout(saveDebounceTimer);
+        saveDebounceTimer = setTimeout(() => {
+          saveDebounceTimer = null;
+          if (ipcRenderer) ipcRenderer.send('pet-config-changed', cfg);
+        }, 500);
       }
     }
 
@@ -352,7 +351,7 @@
 
     scaleNumber.addEventListener('input', () => {
       const v = Math.max(1, Math.min(20, Math.round(Number(scaleNumber.value) || 7)));
-      const s = (v - 1) * 0.1 + 0.6;
+      const s = Math.round(((v - 1) * 0.1 + 0.6) * 10) / 10;
       applyScale(s, true);
     });
     scaleNumber.addEventListener('change', () => {

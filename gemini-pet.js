@@ -2020,6 +2020,10 @@
         if (data && (data.amount !== undefined || data.isLive)) {
           showCostBubble(data.amount, data.unit || 'tokens', !!data.isLive);
         }
+      ipcRenderer.on('pet-apply-scale', function (e, s) {
+        if (s !== undefined && Math.abs(Number(s) - state.scale) > 0.05) {
+          setScale(s, true);
+        }
       });
       ipcRenderer.on('pet-apply-config', function (e, c) {
         if (!c) return;

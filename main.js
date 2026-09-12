@@ -126,16 +126,17 @@ function ensureWatcherProcess() {
   try {
     const watcherExe = getWatcherExePath();
     if (!fs.existsSync(watcherExe)) return;
-    const tasklist = child_process.execSync('tasklist /FI "IMAGENAME eq ag_watcher.exe" /FO CSV /NH', { encoding: 'utf8' });
-    if (!tasklist.toLowerCase().includes('ag_watcher.exe')) {
-      const child = child_process.spawn(watcherExe, [], {
-        detached: true,
-        stdio: 'ignore',
-        windowsHide: true
-      });
-      child.unref();
-      logMsg('Spawned ag_watcher.exe');
-    }
+    child_process.exec('tasklist /FI "IMAGENAME eq ag_watcher.exe" /FO CSV /NH', (err, stdout) => {
+      if (!stdout || !stdout.toLowerCase().includes('ag_watcher.exe')) {
+        const child = child_process.spawn(watcherExe, [], {
+          detached: true,
+          stdio: 'ignore',
+          windowsHide: true
+        });
+        child.unref();
+        logMsg('Spawned ag_watcher.exe');
+      }
+    });
   } catch (e) {
     logMsg('ensureWatcherProcess error: ' + e);
   }
@@ -143,14 +144,18 @@ function ensureWatcherProcess() {
 
 function killWatcherProcess() {
   try {
-    child_process.execSync('taskkill /F /IM ag_watcher.exe /T', { stdio: 'ignore' });
+    child_process.exec('taskkill /F /IM ag_watcher.exe /T', () => {});
     logMsg('Killed ag_watcher.exe');
   } catch (_) {}
 }
 
+let lastRegisteredSyncMode = null;
+
 function updateWatcherRegistration(cfg) {
   try {
     const mode = cfg.antigravitySyncMode || 'manual';
+    if (mode === lastRegisteredSyncMode) return;
+    lastRegisteredSyncMode = mode;
     const watcherExe = getWatcherExePath();
 
     if (mode === 'sync_all' || mode === 'sync_start') {
@@ -685,6 +690,10 @@ function registerIpc() {
       if (!petWin || petWin.isDestroyed()) return;
       const s = Math.max(0.6, Math.min(2.5, Number(scale) || 1.2));
       targetScaleReq = { s, isLeft: !!isLeft };
+
+      try {
+        petWin.webContents.send('pet-apply-scale', s);
+      } catch (_) {}
 
       if (!scaleResizeTimer) {
         scaleResizeTimer = setTimeout(() => {
