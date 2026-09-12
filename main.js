@@ -670,7 +670,6 @@ function createSettingsWindow() {
 // 7. IPC Registration
 let ipcRegistered = false;
 let currentPetBounds = null;
-let scaleResizeTimer = null;
 let targetScaleReq = null;
 
 function getSafePetBounds() {
@@ -687,28 +686,16 @@ function registerIpc() {
   if (ipcRegistered) return;
   ipcRegistered = true;
 
-  ipcMain.on('pet-move-by', (event, dx, dy) => {
-    try {
-      if (petWin && !petWin.isDestroyed()) {
-        const b = getSafePetBounds();
-        b.x = Math.round(b.x + dx);
-        b.y = Math.round(b.y + dy);
-        petWin.setPosition(b.x, b.y);
-      }
-    } catch (_) {}
-  });
-
   ipcMain.on('pet-set-position', (event, x, y) => {
     try {
-      if (petWin && !petWin.isDestroyed()) {
-        const nx = Math.round(x);
-        const ny = Math.round(y);
-        const b = getSafePetBounds();
-        b.x = nx;
-        b.y = ny;
-        petWin.setPosition(nx, ny);
-        savePosition(nx, ny);
-      }
+      if (!petWin || petWin.isDestroyed()) return;
+      const nx = Math.round(x);
+      const ny = Math.round(y);
+      const b = getSafePetBounds();
+      b.x = nx;
+      b.y = ny;
+      petWin.setPosition(nx, ny);
+      savePosition(nx, ny);
     } catch (_) {}
   });
 
@@ -747,30 +734,6 @@ function registerIpc() {
     } catch (_) {}
   }
 
-  ipcMain.on('pet-scale-start', (event, isLeft) => {
-    try {
-      if (!petWin || petWin.isDestroyed()) return;
-      const b = getSafePetBounds();
-      const disp = screen.getDisplayMatching(b);
-      const leftMode = isLeft !== undefined
-        ? !!isLeft
-        : (b.x < (disp.workArea.x + disp.workArea.width / 2));
-      const maxW = 750;
-      const maxH = 980;
-      if (b.width < maxW || b.height < maxH) {
-        const anchorRight = b.x + b.width;
-        const anchorBottom = b.y + b.height;
-        const newX = leftMode ? b.x : (anchorRight - maxW);
-        const newY = anchorBottom - maxH;
-        b.x = Math.round(newX);
-        b.y = Math.round(newY);
-        b.width = maxW;
-        b.height = maxH;
-        petWin.setBounds(b);
-      }
-    } catch (_) {}
-  });
-
   ipcMain.on('pet-set-scale', (event, scale, isLeft) => {
     try {
       if (!petWin || petWin.isDestroyed()) return;
@@ -782,24 +745,6 @@ function registerIpc() {
         petWin.webContents.send('pet-apply-scale', s);
       } catch (_) {}
 
-      if (scaleResizeTimer) {
-        clearTimeout(scaleResizeTimer);
-        scaleResizeTimer = null;
-      }
-      applyFinalScaleBounds();
-    } catch (_) {}
-  });
-
-  ipcMain.on('pet-scale-end', (event, scale, isLeft) => {
-    try {
-      if (scale !== undefined) {
-        targetScaleReq = { s: Math.max(0.6, Math.min(2.5, Number(scale) || 1.2)), isLeft: isLeft !== undefined ? !!isLeft : undefined };
-        saveMasterConfig({ scale: targetScaleReq.s });
-      }
-      if (scaleResizeTimer) {
-        clearTimeout(scaleResizeTimer);
-        scaleResizeTimer = null;
-      }
       applyFinalScaleBounds();
     } catch (_) {}
   });

@@ -23,8 +23,7 @@
     chill: "./assets/chill.png",
     fall: "./assets/fall.png",
     pat: "./assets/pat.png",
-    typing: "./assets/typing.png",
-    sleep: "./assets/chill.png"
+    typing: "./assets/typing.png"
   };
 
   var SOUND_DATA = {
@@ -425,9 +424,9 @@
       vOff: 20,
       left: 0,
       top: 0,
-      gemini5h: 1,
+      gemini5h: null,
       gemini5hReset: '',
-      geminiWeekly: 1,
+      geminiWeekly: null,
       geminiWeeklyReset: '',
       claude5h: 1,
       claudeWeekly: 1,
