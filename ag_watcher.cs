@@ -29,11 +29,13 @@ namespace GeminiPetWatcher
                     {
                         string syncMode = "manual";
                         string petExePath = null;
+                        string petAppPath = null;
                         if (File.Exists(configFile))
                         {
                             string json = File.ReadAllText(configFile);
                             syncMode = ExtractJsonValue(json, "antigravitySyncMode") ?? "manual";
                             petExePath = ExtractJsonValue(json, "petExePath");
+                            petAppPath = ExtractJsonValue(json, "petAppPath");
                         }
 
                         // If user set mode back to manual, watcher gracefully exits
@@ -73,14 +75,33 @@ namespace GeminiPetWatcher
                         // If Antigravity is running and not suppressed, ensure GeminiPet is running
                         if (agRunning && (currentAgPid != suppressedPid))
                         {
-                            Process[] petProcesses = Process.GetProcessesByName("GeminiPet");
-                            if (petProcesses.Length == 0)
+                            bool petRunning = false;
+                            if (Process.GetProcessesByName("GeminiPet").Length > 0)
+                            {
+                                petRunning = true;
+                            }
+                            else if (!string.IsNullOrEmpty(petExePath))
+                            {
+                                string procName = Path.GetFileNameWithoutExtension(petExePath);
+                                if (Process.GetProcessesByName(procName).Length > 0)
+                                {
+                                    petRunning = true;
+                                }
+                            }
+
+                            if (!petRunning)
                             {
                                 if (!string.IsNullOrEmpty(petExePath) && File.Exists(petExePath))
                                 {
                                     ProcessStartInfo psi = new ProcessStartInfo();
                                     psi.FileName = petExePath;
-                                    psi.WorkingDirectory = Path.GetDirectoryName(petExePath);
+                                    psi.WorkingDirectory = !string.IsNullOrEmpty(petAppPath) && Directory.Exists(petAppPath)
+                                        ? petAppPath
+                                        : Path.GetDirectoryName(petExePath);
+                                    if (!string.IsNullOrEmpty(petAppPath))
+                                    {
+                                        psi.Arguments = "\"" + petAppPath + "\"";
+                                    }
                                     psi.UseShellExecute = true;
                                     Process.Start(psi);
                                     Thread.Sleep(3000);

@@ -158,13 +158,18 @@ let lastRegisteredSyncMode = null;
 function updateWatcherRegistration(cfg) {
   try {
     const mode = cfg.antigravitySyncMode || 'manual';
-    if (mode === lastRegisteredSyncMode) return;
+    const isPackaged = app.isPackaged || !/electron\.exe$/i.test(process.execPath);
+    const expectedAppPath = isPackaged ? '' : __dirname;
+    const pathChanged = (cfg.petExePath !== process.execPath) || (cfg.petAppPath !== expectedAppPath);
+
+    if (mode === lastRegisteredSyncMode && !pathChanged) return;
     lastRegisteredSyncMode = mode;
     const watcherExe = getWatcherExePath();
 
     if (mode === 'sync_all' || mode === 'sync_start') {
       cfg.petExePath = process.execPath;
-      saveMasterConfig(cfg);
+      cfg.petAppPath = expectedAppPath;
+      saveMasterConfig(cfg, true);
 
       if (fs.existsSync(watcherExe)) {
         const regCmd = `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" /v "GeminiPetWatcher" /t REG_SZ /d "\\"${watcherExe}\\"" /f`;
