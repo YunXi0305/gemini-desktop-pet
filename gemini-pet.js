@@ -675,6 +675,7 @@
       if (hintFadeTimer) { clearTimeout(hintFadeTimer); hintFadeTimer = null; }
       textBox.style.transition = '';
       textBox.style.opacity = '';
+      amountEl.style.fontSize = '';
       hintEl.style.transition = '';
       hintEl.style.opacity = '';
       bubbleRandomActive = false;
@@ -695,8 +696,7 @@
       triggerBubbleOnPress();
     });
 
-    // Turn Cost Bubble (supports live streaming ticks and final summary)
-    var maxCostSeenInBubble = 0;
+    // Turn Cost Bubble (live working status + full turn token summary)
     function showCostBubble(amount, unit, isLive) {
       if (!bubbleOn || !turnCostOn) return;
       if (costBubbleTimer) { clearTimeout(costBubbleTimer); costBubbleTimer = null; }
@@ -714,26 +714,21 @@
       hintEl.textContent = '';
 
       if (isLive) {
-        labelEl.textContent = '✦ 正在思考与消耗:';
+        labelEl.textContent = '✦ 正在思考与敲代码...';
         labelEl.style.color = '#7c3aed';
-        if (typeof amount === 'number') {
-          if (amount > maxCostSeenInBubble) maxCostSeenInBubble = amount;
-          amountEl.textContent = maxCostSeenInBubble > 0 ? (maxCostSeenInBubble.toLocaleString() + ' ' + (unit || 'tokens') + '...') : '计算中...';
-        } else {
-          amountEl.textContent = '计算中...';
-        }
+        amountEl.textContent = '持续工作中喵~ (ฅ^ω^ฅ)';
         amountEl.style.color = '#7c3aed';
+        amountEl.style.fontSize = 'calc(var(--dshw-u) * 50)';
         bubbleBox.classList.add('dshwv-bubble-open');
-        // While streaming, keep bubble open without auto-close timer
+        // Keep open while agent is working
       } else {
-        labelEl.textContent = '✦ 本轮对话总消耗:';
+        labelEl.textContent = '✦ 主人，本次一共消耗:';
         labelEl.style.color = '#2563eb';
-        var finalAmt = typeof amount === 'number' ? Math.max(maxCostSeenInBubble, amount) : amount;
-        maxCostSeenInBubble = 0; // reset for next conversation turn
-        if (typeof finalAmt === 'number') {
-          amountEl.textContent = unit ? (finalAmt.toLocaleString() + ' ' + unit) : (finalAmt.toLocaleString() + ' tokens');
+        amountEl.style.fontSize = '';
+        if (typeof amount === 'number') {
+          amountEl.textContent = amount.toLocaleString() + ' ' + (unit || 'tokens');
         } else {
-          amountEl.textContent = String(finalAmt || '--');
+          amountEl.textContent = String(amount || '--');
         }
         amountEl.style.color = '#e0433f';
         bubbleBox.classList.add('dshwv-bubble-open');

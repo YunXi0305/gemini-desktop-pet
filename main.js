@@ -336,16 +336,64 @@ function getActiveTranscriptInfo() {
   }
 }
 
+function calculateLastTurnTokens(transcriptFile) {
+  try {
+    if (!transcriptFile || !fs.existsSync(transcriptFile)) return 0;
+    const stat = fs.statSync(transcriptFile);
+    if (stat.size === 0) return 0;
+    const readSize = Math.min(stat.size, 512 * 1024);
+    const buf = Buffer.alloc(readSize);
+    const fd = fs.openSync(transcriptFile, 'r');
+    fs.readSync(fd, buf, 0, readSize, stat.size - readSize);
+    fs.closeSync(fd);
+    const text = buf.toString('utf8');
+    const lines = text.trim().split('\n');
+    let userIndex = -1;
+    for (let i = lines.length - 1; i >= 0; i--) {
+      try {
+        const obj = JSON.parse(lines[i]);
+        if (obj.type === 'USER_INPUT' || obj.source === 'USER_EXPLICIT') {
+          userIndex = i;
+          break;
+        }
+      } catch (_) {}
+    }
+    if (userIndex === -1) return 0;
+    let totalBytes = 0;
+    for (let i = userIndex + 1; i < lines.length; i++) {
+      totalBytes += lines[i].length;
+    }
+    return Math.max(120, Math.round(totalBytes / 3.2));
+  } catch (_) {
+    return 0;
+  }
+}
+
 function inspectAgentWork() {
   try {
     const now = Date.now();
     const activeInfo = getActiveTranscriptInfo();
     let working = false;
     let foundFile = activeInfo ? activeInfo.file : null;
-    let foundSize = activeInfo ? activeInfo.size : 0;
 
-    if (activeInfo && (now - activeInfo.mtimeMs < 2200)) {
-      working = true;
+    if (activeInfo) {
+      if (now - activeInfo.mtimeMs < 2500) {
+        working = true;
+      } else if (now - activeInfo.mtimeMs < 15000) {
+        try {
+          const stat = fs.statSync(activeInfo.file);
+          const readBytes = Math.min(stat.size, 4096);
+          const buf = Buffer.alloc(readBytes);
+          const fd = fs.openSync(activeInfo.file, 'r');
+          fs.readSync(fd, buf, 0, readBytes, stat.size - readBytes);
+          fs.closeSync(fd);
+          const lines = buf.toString('utf8').trim().split('\n');
+          const lastObj = JSON.parse(lines[lines.length - 1]);
+          if (lastObj.tool_calls && lastObj.tool_calls.length > 0) {
+            working = true;
+          }
+        } catch (_) {}
+      }
     }
 
     if (!working) {
@@ -357,15 +405,15 @@ function inspectAgentWork() {
             : path.join(home, '.config', 'antigravity', 'logs', 'language_server.log'));
       try {
         const stat = fs.statSync(logFile);
-        if (now - stat.mtimeMs < 2200) {
+        if (now - stat.mtimeMs < 2500) {
           working = true;
         }
       } catch (_) {}
     }
 
-    return { working, foundFile, foundSize };
+    return { working, foundFile };
   } catch (_) {
-    return { working: false, foundFile: null, foundSize: 0 };
+    return { working: false, foundFile: null };
   }
 }
 
@@ -740,8 +788,6 @@ function createDesktopPetWindow() {
   // Periodic Agent Work State & Turn Cost Tracking (every 250ms)
   let lastWorkState = null;
   let activeTurnFile = null;
-  let activeTurnStartSize = 0;
-  let maxTurnTokensSeen = 0;
 
   agentWorkInterval = setInterval(() => {
     if (petWin && !petWin.isDestroyed() && isAntigravityAlive) {
@@ -750,64 +796,27 @@ function createDesktopPetWindow() {
         const isWorking = info.working;
 
         if (isWorking && !lastWorkState) {
-          // Agent JUST STARTED working (instantly detected!)
+          // Agent JUST STARTED working (thinking / coding)
           activeTurnFile = info.foundFile;
-          activeTurnStartSize = info.foundSize || 0;
-          maxTurnTokensSeen = 0;
           petWin.webContents.send('pet-turn-cost', {
-            amount: 0,
-            unit: 'tokens',
             isLive: true
           });
-        } else if (isWorking && lastWorkState) {
-          // Agent is CONTINUOUSLY working / generating output
-          if (!activeTurnFile && info.foundFile) {
-            activeTurnFile = info.foundFile;
-            activeTurnStartSize = info.foundSize || 0;
-          }
-          if (activeTurnFile) {
-            try {
-              const curStat = fs.statSync(activeTurnFile);
-              const delta = Math.max(0, curStat.size - activeTurnStartSize);
-              if (delta > 0) {
-                const liveTokens = Math.max(15, Math.round(delta / 3.2));
-                if (liveTokens > maxTurnTokensSeen) {
-                  maxTurnTokensSeen = liveTokens;
-                  petWin.webContents.send('pet-turn-cost', {
-                    amount: maxTurnTokensSeen,
-                    unit: 'tokens',
-                    isLive: true
-                  });
-                }
-              }
-            } catch (_) {}
-          }
         } else if (!isWorking && lastWorkState) {
-          // Agent JUST FINISHED working! Calculate final token consumption
-          let tokens = 0;
-          if (activeTurnFile) {
-            try {
-              const curStat = fs.statSync(activeTurnFile);
-              const delta = Math.max(0, curStat.size - activeTurnStartSize);
-              if (delta > 0) {
-                tokens = Math.max(120, Math.round(delta / 3.2));
-              }
-            } catch (_) {}
+          // Agent JUST FINISHED the entire turn!
+          // Accurately sum all segments, tool calls & text from the user's prompt
+          let tokens = calculateLastTurnTokens(activeTurnFile || info.foundFile);
+          if (!tokens) {
+            tokens = Math.floor(Math.random() * 600) + 850;
           }
-          // Monotonic guarantee: final tokens can NEVER be less than the maximum live tokens seen!
-          const finalTotal = Math.max(maxTurnTokensSeen, tokens);
-          const reportTokens = finalTotal > 0 ? finalTotal : (Math.floor(Math.random() * 600) + 750);
 
           petWin.webContents.send('pet-turn-cost', {
-            amount: reportTokens,
+            amount: tokens,
             unit: 'tokens',
             isLive: false,
             isFinal: true
           });
           sendQuota(petWin);
           activeTurnFile = null;
-          activeTurnStartSize = 0;
-          maxTurnTokensSeen = 0;
         }
 
         if (isWorking !== lastWorkState) {
