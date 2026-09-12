@@ -56,9 +56,9 @@
     '.gpet-heart{position:absolute;pointer-events:none;font-size:22px;line-height:1;animation:gpet-heart-float 1.1s cubic-bezier(0.2,0.8,0.4,1) forwards;z-index:100;user-select:none;filter:drop-shadow(0 2px 8px rgba(236,72,153,0.45))}',
     '.gpet-bubble{position:absolute;left:0;top:0;width:100%;aspect-ratio:1026/700;pointer-events:none;z-index:1;--gpet-u:calc(var(--gpet-base) / 1026);opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s}',
     '.gpet-bubble.gpet-bubble-open{opacity:1;visibility:visible;transition:opacity .2s ease,visibility 0s}',
-    '.gpet-bubble svg{display:block;width:100%;height:100%;pointer-events:none;filter:drop-shadow(0 8px 24px rgba(32,49,112,0.22))}',
-    '.gpet-bubble svg path,.gpet-bubble svg ellipse{pointer-events:none;cursor:pointer}',
-    '.gpet-bubble.gpet-bubble-open svg path,.gpet-bubble.gpet-bubble-open svg ellipse{pointer-events:visiblePainted}',
+    '.gpet-bubble svg{display:block;width:100%;height:100%;pointer-events:none;filter:drop-shadow(0 12px 28px rgba(10,15,35,0.65)) drop-shadow(0 0 16px rgba(56,189,248,0.35))}',
+    '.gpet-bubble svg path,.gpet-bubble svg ellipse,.gpet-bubble svg circle{pointer-events:none;cursor:pointer}',
+    '.gpet-bubble.gpet-bubble-open svg path,.gpet-bubble.gpet-bubble-open svg ellipse,.gpet-bubble.gpet-bubble-open svg circle{pointer-events:visiblePainted}',
     '.gpet-bubble .gpet-bshape,.gpet-bubble .gpet-b1,.gpet-bubble .gpet-b2{opacity:0;transform:scale(.7);transform-box:fill-box;transform-origin:50% 50%;transition:opacity .2s ease,transform .2s ease}',
     '.gpet-bubble.gpet-bubble-open .gpet-bshape,.gpet-bubble.gpet-bubble-open .gpet-b1,.gpet-bubble.gpet-bubble-open .gpet-b2{opacity:1;transform:none}',
     '.gpet-bubble.gpet-bubble-open .gpet-b2{transition-delay:0s}',
@@ -67,15 +67,15 @@
     '.gpet-bubble .gpet-bshape{transition-delay:.1s}',
     '.gpet-bubble .gpet-b1{transition-delay:.2s}',
     '.gpet-bubble .gpet-b2{transition-delay:.3s}',
-    '.gpet-text{position:absolute;left:44.25%;top:38%;transform:translate(-50%,-50%);text-align:center;color:#1e3a8a;line-height:1.2;white-space:nowrap;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .16s ease,transform .3s ease;width:66%;max-width:calc(var(--gpet-u) * 520);box-sizing:border-box}',
+    '.gpet-text{position:absolute;left:44%;top:36%;transform:translate(-50%,-50%);text-align:center;color:#f8fafc;line-height:1.25;white-space:nowrap;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .16s ease,transform .3s ease;width:68%;max-width:calc(var(--gpet-u) * 530);box-sizing:border-box}',
     '.gpet-bubble.gpet-bubble-open .gpet-text{opacity:1;visibility:visible;transition:opacity .16s ease .36s,transform .3s ease}',
     '.gpet-bubble:not(.gpet-bubble-open) .gpet-text{opacity:0 !important;visibility:hidden !important}',
     '.gpet-root.gpet-left .gpet-text{transform:translate(-50%,-50%) scaleX(-1)}',
-    '.gpet-label{font-size:calc(var(--gpet-u) * 48);font-weight:700;letter-spacing:.03em;color:#2563eb}',
-    '.gpet-amount{font-size:calc(var(--gpet-u) * 88);font-weight:800;line-height:1.08;color:#0f172a;letter-spacing:-0.02em}',
+    '.gpet-label{font-size:calc(var(--gpet-u) * 44);font-weight:700;letter-spacing:.04em;color:#38bdf8;text-shadow:0 0 10px rgba(56,189,248,0.45)}',
+    '.gpet-amount{font-size:calc(var(--gpet-u) * 88);font-weight:800;line-height:1.1;color:#ffffff;letter-spacing:-0.01em;text-shadow:0 0 14px rgba(255,255,255,0.35)}',
     '.gpet-period{font-size:calc(var(--gpet-u) * 76);font-weight:800;line-height:1.05}',
-    '.gpet-wrap{white-space:normal;max-width:calc(var(--gpet-u) * 450);line-height:1.32;font-size:calc(var(--gpet-u) * 42);margin:0 auto;word-break:break-word}',
-    '.gpet-hint{font-size:calc(var(--gpet-u) * 40);color:#64748b;letter-spacing:.02em;margin-top:calc(var(--gpet-u) * 8);min-height:calc(var(--gpet-u) * 48);line-height:1.15;font-weight:500}',
+    '.gpet-wrap{white-space:normal;max-width:calc(var(--gpet-u) * 450);line-height:1.32;font-size:calc(var(--gpet-u) * 42);margin:0 auto;word-break:break-word;text-shadow:0 0 8px rgba(255,255,255,0.25)}',
+    '.gpet-hint{font-size:calc(var(--gpet-u) * 38);color:#cbd5e1;letter-spacing:.02em;margin-top:calc(var(--gpet-u) * 10);min-height:calc(var(--gpet-u) * 46);line-height:1.2;font-weight:500;text-shadow:0 0 8px rgba(203,213,225,0.3)}',
     '.gpet-menu{position:fixed;min-width:210px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;background:rgba(255,255,255,0.96);backdrop-filter:blur(16px);border:1px solid rgba(37,99,235,0.25);border-radius:12px;padding:10px 12px;opacity:0;transform:scale(.92) translateY(-6px);transition:opacity .18s ease,transform .2s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:100000;box-shadow:0 12px 32px rgba(15,23,42,0.22);color-scheme:light;box-sizing:border-box}',
     '.gpet-menu.gpet-menu-open{opacity:1;transform:scale(1) translateY(0);pointer-events:auto}',
     '.gpet-menu-title{font-size:13px;font-weight:700;color:#1e3a8a;margin-bottom:8px;display:flex;align-items:center;gap:6px}',
@@ -117,9 +117,25 @@
     var bubbleBox = document.createElement('div');
     bubbleBox.className = 'gpet-bubble';
     bubbleBox.innerHTML = '<svg viewBox="0 0 1026 700" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">' +
-      '<path class="gpet-bshape" fill="#FFFFFF" stroke="#2563eb" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" d="M 830,240 C 830,105 675,35 455,35 C 235,35 80,105 80,240 C 80,375 235,445 455,445 C 510,445 565,438 615,424 C 680,455 745,475 775,482 C 770,455 766,432 764,408 C 805,362 830,305 830,240 Z"/>' +
-      '<circle class="gpet-b1" cx="370" cy="565" r="26" fill="#FFFFFF" stroke="#2563eb" stroke-width="16"/>' +
-      '<circle class="gpet-b2" cx="445" cy="638" r="17" fill="#FFFFFF" stroke="#2563eb" stroke-width="16"/>' +
+      '<defs>' +
+      '  <linearGradient id="gpet-star-bg" x1="0%" y1="0%" x2="100%" y2="100%">' +
+      '    <stop offset="0%" stop-color="#0b0f19" stop-opacity="0.94"/>' +
+      '    <stop offset="50%" stop-color="#1e1b4b" stop-opacity="0.92"/>' +
+      '    <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/>' +
+      '  </linearGradient>' +
+      '  <linearGradient id="gpet-star-border" x1="0%" y1="0%" x2="100%" y2="100%">' +
+      '    <stop offset="0%" stop-color="#38bdf8"/>' +
+      '    <stop offset="45%" stop-color="#818cf8"/>' +
+      '    <stop offset="100%" stop-color="#c084fc"/>' +
+      '  </linearGradient>' +
+      '</defs>' +
+      '<path class="gpet-bshape" fill="url(#gpet-star-bg)" stroke="url(#gpet-star-border)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" d="M 805,225 C 805,105 660,38 450,38 C 240,38 85,105 85,225 C 85,345 240,418 450,418 C 500,418 545,412 585,398 C 655,412 730,375 770,320 C 795,290 805,258 805,225 Z"/>' +
+      '<circle class="gpet-b1" cx="530" cy="468" r="22" fill="url(#gpet-star-bg)" stroke="url(#gpet-star-border)" stroke-width="11"/>' +
+      '<circle class="gpet-b2" cx="600" cy="518" r="14" fill="url(#gpet-star-bg)" stroke="url(#gpet-star-border)" stroke-width="9"/>' +
+      '<path d="M 750,90 Q 750,105 765,105 Q 750,105 750,120 Q 750,105 735,105 Q 750,105 750,90 Z" fill="#38bdf8" opacity="0.85"/>' +
+      '<path d="M 140,120 Q 140,132 152,132 Q 140,132 140,144 Q 140,132 128,132 Q 140,132 140,120 Z" fill="#c084fc" opacity="0.75"/>' +
+      '<circle cx="730" cy="140" r="3" fill="#ffffff" opacity="0.6"/>' +
+      '<circle cx="165" cy="100" r="2.5" fill="#38bdf8" opacity="0.6"/>' +
       '</svg>';
 
     var textBox = document.createElement('div');
@@ -407,9 +423,9 @@
 
     function getQuotaColor(val) {
       var pct = val * 100;
-      if (pct <= 20) return '#ef4444';
-      if (pct <= 50) return '#f59e0b';
-      return '#2563eb';
+      if (pct <= 20) return '#fb7185';
+      if (pct <= 50) return '#fbbf24';
+      return '#38bdf8';
     }
 
     // Interactive Cat Maid & Coder Dialogue Quotes (随着按压次数随机显示)
@@ -446,13 +462,13 @@
 
     var lastQuoteIdx = -1;
     function pickRandomQuoteLines() {
-      if (TEXT_QUOTES.length <= 1) return singleCenter('A', TEXT_QUOTES[0], '#1e3a8a', true);
+      if (TEXT_QUOTES.length <= 1) return singleCenter('A', TEXT_QUOTES[0], '#e2e8f0', true);
       var idx;
       do {
         idx = Math.floor(Math.random() * TEXT_QUOTES.length);
       } while (idx === lastQuoteIdx);
       lastQuoteIdx = idx;
-      return singleCenter('A', TEXT_QUOTES[idx], '#1e3a8a', true);
+      return singleCenter('A', TEXT_QUOTES[idx], '#e2e8f0', true);
     }
 
     function applyBubbleLines(lines) {
@@ -465,7 +481,7 @@
           if (typeof ln === 'string') {
             el.className = 'gpet-label gpet-wrap';
             el.textContent = ln;
-            el.style.color = '#1e3a8a';
+            el.style.color = '#e2e8f0';
           } else {
             el.className = (BUBBLE_STYLE_CLASS[ln.s] || 'gpet-label') + (ln.w ? ' gpet-wrap' : '');
             el.textContent = ln.t !== undefined ? ln.t : '';
@@ -520,7 +536,7 @@
       lastHintText = null;
       labelEl.style.display = '';
       labelEl.className = 'gpet-label';
-      labelEl.style.color = '#2563eb';
+      labelEl.style.color = '#38bdf8';
       amountEl.style.display = '';
       amountEl.className = 'gpet-amount';
       hintEl.style.display = '';
@@ -582,10 +598,10 @@
       pressCount = 2;
 
       var fallQuotes = [
-        singleCenter('A', '呜哇... 屁股摔得好痛痛 QAQ', '#ef4444', true),
-        singleCenter('A', '呜呜呜... 谁把人家扔下来的？！', '#ef4444', true),
-        singleCenter('A', '晕乎乎... 头顶冒小星星了 @o@', '#2563eb', true),
-        singleCenter('A', '哎哟... 下次要接住我嘛~ 哼！', '#1e3a8a', true)
+        singleCenter('A', '呜哇... 屁股摔得好痛痛 QAQ', '#fb7185', true),
+        singleCenter('A', '呜呜呜... 谁把人家扔下来的？！', '#fb7185', true),
+        singleCenter('A', '晕乎乎... 头顶冒小星星了 @o@', '#c084fc', true),
+        singleCenter('A', '哎哟... 下次要接住我嘛~ 哼！', '#38bdf8', true)
       ];
       var lines = pickOne(fallQuotes);
 
@@ -627,12 +643,12 @@
       pressCount = 2;
 
       var patQuotes = [
-        singleCenter('A', '呼噜呼噜… 最喜欢主人摸摸啦~ (ฅ^ω^ฅ)', '#ec4899', true),
-        singleCenter('A', '蹭蹭~ 主人的手好暖和呀 ✦', '#ec4899', true),
-        singleCenter('A', '脸颊都要被主人揉圆了啦… > <', '#db2777', true),
-        singleCenter('A', '摸摸头，今天写代码 Bug 全部退散喵！', '#2563eb', true),
-        singleCenter('A', '唔姆… 好舒服，猫猫不想努力了喵~ (//∇//)', '#ec4899', true),
-        singleCenter('A', '最喜欢被主人温柔摸头了喵~ 💖', '#ec4899', true)
+        singleCenter('A', '呼噜呼噜… 最喜欢主人摸摸啦~ (ฅ^ω^ฅ)', '#f472b6', true),
+        singleCenter('A', '蹭蹭~ 主人的手好暖和呀 ✦', '#f472b6', true),
+        singleCenter('A', '脸颊都要被主人揉圆了啦… > <', '#fb7185', true),
+        singleCenter('A', '摸摸头，今天写代码 Bug 全部退散喵！', '#38bdf8', true),
+        singleCenter('A', '唔姆… 好舒服，猫猫不想努力了喵~ (//∇//)', '#f472b6', true),
+        singleCenter('A', '最喜欢被主人温柔摸头了喵~ 💖', '#f472b6', true)
       ];
       var lines = pickOne(patQuotes);
 
@@ -654,7 +670,7 @@
       if (bubbleTimer) { clearTimeout(bubbleTimer); bubbleTimer = null; }
       bubbleRandomActive = true;
       pressCount = 2;
-      var lines = singleCenter('A', text, color || '#2563eb', true);
+      var lines = singleCenter('A', text, color || '#38bdf8', true);
       if (bubbleShown) {
         swapBubbleContent(function () {
           applyBubbleLines(lines);
@@ -715,22 +731,22 @@
 
       if (isLive) {
         labelEl.textContent = '✦ 正在思考与敲代码...';
-        labelEl.style.color = '#7c3aed';
+        labelEl.style.color = '#c084fc';
         amountEl.textContent = '持续工作中喵~ (ฅ^ω^ฅ)';
-        amountEl.style.color = '#7c3aed';
+        amountEl.style.color = '#38bdf8';
         amountEl.style.fontSize = 'calc(var(--gpet-u) * 50)';
         bubbleBox.classList.add('gpet-bubble-open');
         // Keep open while agent is working
       } else {
         labelEl.textContent = '✦ 主人，本次一共消耗:';
-        labelEl.style.color = '#2563eb';
+        labelEl.style.color = '#38bdf8';
         amountEl.style.fontSize = '';
         if (typeof amount === 'number') {
           amountEl.textContent = amount.toLocaleString() + ' ' + (unit || 'tokens');
         } else {
           amountEl.textContent = String(amount || '--');
         }
-        amountEl.style.color = '#e0433f';
+        amountEl.style.color = '#fb7185';
         bubbleBox.classList.add('gpet-bubble-open');
         if (turnCostCloseMs > 0) {
           costBubbleTimer = setTimeout(hideCostBubble, turnCostCloseMs);
@@ -1585,7 +1601,7 @@
             '浮空守护中… 屏幕视野超棒喵~ (ฅ^ω^ฅ)',
             '反重力小猫咪随时待命 ✦'
           ];
-          var lines = singleCenter('A', pickOne(hoverQuotes), '#2563eb', true);
+          var lines = singleCenter('A', pickOne(hoverQuotes), '#38bdf8', true);
           applyBubbleLines(lines);
           bubbleShown = true;
           bubbleBox.classList.add('gpet-bubble-open');
@@ -1935,7 +1951,7 @@
           void img.offsetWidth;
           img.classList.add('gpet-jelly');
           playRelease();
-          showCustomSpeechBubble('✦ 主人，我在这里喵！(ฅ^ω^ฅ)', '#2563eb');
+          showCustomSpeechBubble('✦ 主人，我在这里喵！(ฅ^ω^ฅ)', '#38bdf8');
         } catch (_) {}
       });
       ipcRenderer.on('pet-quota-update', function (e, data) {
