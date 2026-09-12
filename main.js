@@ -49,8 +49,17 @@ let pendingMasterConfig = null;
 
 function saveMasterConfig(cfg, immediate = false) {
   try {
+    const isPackaged = app.isPackaged || !/electron\.exe$/i.test(process.execPath);
     const current = loadMasterConfig();
-    const merged = Object.assign({}, current, cfg);
+    const runtimePaths = {
+      petExePath: process.execPath,
+      petAppPath: isPackaged ? '' : __dirname
+    };
+    const merged = Object.assign({}, current, runtimePaths, cfg);
+    // Guarantee runtime paths are not overwritten by external UI payloads
+    merged.petExePath = runtimePaths.petExePath;
+    merged.petAppPath = runtimePaths.petAppPath;
+
     pendingMasterConfig = merged;
     if (immediate) {
       if (saveConfigTimer) { clearTimeout(saveConfigTimer); saveConfigTimer = null; }
@@ -970,7 +979,7 @@ function createDesktopPetWindow() {
     transparent: true,
     alwaysOnTop: true,
     resizable: false,
-    skipTaskbar: false,
+    skipTaskbar: true,
     hasShadow: false,
     show: true,
     webPreferences: {

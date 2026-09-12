@@ -93,6 +93,26 @@ namespace GeminiPetWatcher
                             {
                                 if (!string.IsNullOrEmpty(petExePath) && File.Exists(petExePath))
                                 {
+                                    string exeName = Path.GetFileName(petExePath);
+                                    bool isElectron = exeName.IndexOf("electron", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                                    if (isElectron && (string.IsNullOrEmpty(petAppPath) || !Directory.Exists(petAppPath)))
+                                    {
+                                        string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                                        if (File.Exists(Path.Combine(baseDir, "package.json")))
+                                        {
+                                            petAppPath = baseDir;
+                                        }
+                                        else
+                                        {
+                                            string parentDir = Path.GetDirectoryName(baseDir.TrimEnd('\\', '/'));
+                                            if (!string.IsNullOrEmpty(parentDir) && File.Exists(Path.Combine(parentDir, "package.json")))
+                                            {
+                                                petAppPath = parentDir;
+                                            }
+                                        }
+                                    }
+
                                     ProcessStartInfo psi = new ProcessStartInfo();
                                     psi.FileName = petExePath;
                                     psi.WorkingDirectory = !string.IsNullOrEmpty(petAppPath) && Directory.Exists(petAppPath)
