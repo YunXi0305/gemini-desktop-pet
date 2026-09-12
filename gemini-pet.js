@@ -275,6 +275,13 @@
     workStateSelect.appendChild(soundOpt('pat', '摸头眯眼 (害羞享受)'));
     workStateSelect.addEventListener('change', function () { setWorkStateMode(workStateSelect.value); });
 
+    var antigravitySyncSelect = document.createElement('select');
+    antigravitySyncSelect.className = 'gpet-sound';
+    antigravitySyncSelect.appendChild(soundOpt('sync_all', '跟随反重力启动和退出'));
+    antigravitySyncSelect.appendChild(soundOpt('sync_start', '仅跟随反重力启动'));
+    antigravitySyncSelect.appendChild(soundOpt('manual', '自己手动启动，自动检测'));
+    antigravitySyncSelect.addEventListener('change', function () { setAntigravitySyncMode(antigravitySyncSelect.value); });
+
     var bubbleToggle = document.createElement('input');
     bubbleToggle.type = 'checkbox';
     bubbleToggle.className = 'gpet-check';
@@ -313,6 +320,7 @@
     var row3 = menuRow(); row3.appendChild(menuLabel('音量')); row3.appendChild(volInput); row3.appendChild(volPct);
     var row4 = menuRow(); row4.appendChild(menuLabel('配额')); row4.appendChild(quotaViewSelect);
     var rowWork = menuRow(); rowWork.appendChild(menuLabel('状态')); rowWork.appendChild(workStateSelect);
+    var rowSync = menuRow(); rowSync.appendChild(menuLabel('跟随反重力')); rowSync.appendChild(antigravitySyncSelect);
     var row5 = menuRow(); row5.appendChild(menuLabel('气泡')); row5.appendChild(bubbleToggle);
     var rowTyping = menuRow(); rowTyping.appendChild(menuLabel('打字工友')); rowTyping.appendChild(typingToggle);
     var rowGrav = menuRow(); rowGrav.appendChild(menuLabel('重力下落')); rowGrav.appendChild(gravityToggle);
@@ -344,6 +352,7 @@
     menuBox.appendChild(row3);
     menuBox.appendChild(row4);
     menuBox.appendChild(rowWork);
+    menuBox.appendChild(rowSync);
     menuBox.appendChild(row5);
     menuBox.appendChild(rowTyping);
     menuBox.appendChild(rowGrav);
@@ -410,6 +419,7 @@
     var bubbleOn = true;
     var turnCostOn = true;
     var turnCostCloseMs = 5000;
+    var antigravitySyncMode = 'manual'; // 'sync_all' | 'sync_start' | 'manual'
 
     var BUBBLE_STYLE_CLASS = { A: 'gpet-label', B: 'gpet-amount', P: 'gpet-period', C: 'gpet-hint' };
 
@@ -1100,6 +1110,15 @@
       saveConfig();
     }
 
+    function setAntigravitySyncMode(v) {
+      antigravitySyncMode = v || 'manual';
+      if (antigravitySyncSelect) antigravitySyncSelect.value = antigravitySyncMode;
+      saveConfig();
+      if (ipcRenderer) {
+        ipcRenderer.send('pet-config-changed', { antigravitySyncMode: antigravitySyncMode });
+      }
+    }
+
     function saveConfig() {
       try {
         var cfg = {
@@ -1112,7 +1131,8 @@
           gravityOn: gravityOn,
           turnCostOn: turnCostOn,
           turnCostCloseMs: turnCostCloseMs,
-          workStateMode: workStateMode
+          workStateMode: workStateMode,
+          antigravitySyncMode: antigravitySyncMode
         };
         localStorage.setItem('gemini-pet-config', JSON.stringify(cfg));
       } catch (_) {}
@@ -1136,6 +1156,10 @@
             workStateMode = c.workStateMode === 'working' ? 'chill' : c.workStateMode;
             if (workStateSelect) workStateSelect.value = workStateMode;
             syncSprite();
+          }
+          if (c.antigravitySyncMode) {
+            antigravitySyncMode = c.antigravitySyncMode;
+            if (antigravitySyncSelect) antigravitySyncSelect.value = antigravitySyncMode;
           }
         }
       } catch (_) {}
@@ -1980,6 +2004,15 @@
           if (workStateSelect) workStateSelect.value = workStateMode;
           syncSprite();
         }
+        if (c.antigravitySyncMode) {
+          antigravitySyncMode = c.antigravitySyncMode;
+          if (antigravitySyncSelect) antigravitySyncSelect.value = antigravitySyncMode;
+        }
+      });
+      ipcRenderer.on('pet-farewell-exit', function () {
+        try {
+          showCustomSpeechBubble('✦ 反重力已退出，桌宠同步退出喵~ 拜拜！', '#ef4444');
+        } catch (_) {}
       });
       try {
         ipcRenderer.send('pet-request-antigravity-state');
@@ -2016,6 +2049,7 @@
       updateQuota: updateQuotaState,
       setAgentWorking: setAgentWorking,
       setWorkStateMode: setWorkStateMode,
+      setAntigravitySyncMode: setAntigravitySyncMode,
       setScale: setScale,
       refreshQuota: function (manual) {
         if (ipcRenderer) {

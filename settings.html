@@ -205,6 +205,15 @@
     </div>
 
     <div class="menu-row">
+      <span class="menu-label">跟随反重力</span>
+      <select class="select-input" id="antigravitySyncSelect">
+        <option value="sync_all">跟随反重力启动和退出</option>
+        <option value="sync_start">仅跟随反重力启动</option>
+        <option value="manual">自己手动启动，自动检测反重力的开启与关闭</option>
+      </select>
+    </div>
+
+    <div class="menu-row">
       <span class="menu-label">气泡</span>
       <input type="checkbox" class="check-input" id="bubbleToggle">
     </div>
@@ -249,6 +258,7 @@
     const volPct = document.getElementById('volPct');
     const quotaViewSelect = document.getElementById('quotaViewSelect');
     const workStateSelect = document.getElementById('workStateSelect');
+    const antigravitySyncSelect = document.getElementById('antigravitySyncSelect');
     const bubbleToggle = document.getElementById('bubbleToggle');
     const typingToggle = document.getElementById('typingToggle');
     const turnCostToggle = document.getElementById('turnCostToggle');
@@ -270,7 +280,8 @@
         typingOn: true,
         turnCostOn: true,
         turnCostCloseMs: 5000,
-        workStateMode: 'auto'
+        workStateMode: 'auto',
+        antigravitySyncMode: 'manual'
       };
     }
 
@@ -289,6 +300,7 @@
 
       quotaViewSelect.value = cfg.quotaView || '5h';
       workStateSelect.value = cfg.workStateMode || 'auto';
+      antigravitySyncSelect.value = cfg.antigravitySyncMode || 'manual';
 
       bubbleToggle.checked = cfg.bubbleOn !== undefined ? !!cfg.bubbleOn : true;
       typingToggle.checked = cfg.typingOn !== undefined ? !!cfg.typingOn : true;
@@ -343,6 +355,11 @@
 
     workStateSelect.addEventListener('change', () => {
       cfg.workStateMode = workStateSelect.value;
+      saveAndBroadcast(false);
+    });
+
+    antigravitySyncSelect.addEventListener('change', () => {
+      cfg.antigravitySyncMode = antigravitySyncSelect.value;
       saveAndBroadcast(false);
     });
 

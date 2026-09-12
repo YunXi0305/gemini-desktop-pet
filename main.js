@@ -31,7 +31,8 @@ const DEFAULT_CONFIG = {
   typingOn: true,
   turnCostOn: true,
   turnCostCloseMs: 5000,
-  workStateMode: 'auto'
+  workStateMode: 'auto',
+  antigravitySyncMode: 'manual'
 };
 
 function loadMasterConfig() {
@@ -66,6 +67,76 @@ function savePosition(x, y) {
   try {
     fs.writeFileSync(posFile, JSON.stringify({ x, y }), 'utf8');
   } catch (_) {}
+}
+
+function getAntigravityPid() {
+  try {
+    const out = child_process.execSync('tasklist /FI "IMAGENAME eq Antigravity.exe" /FO CSV /NH', { encoding: 'utf8' });
+    const match = out.match(/"Antigravity\.exe","(\d+)"/i);
+    if (match) return Number(match[1]);
+  } catch (_) {}
+  return 0;
+}
+
+function getWatcherExePath() {
+  const localAppWatcher = path.join(__dirname, 'ag_watcher.exe');
+  if (fs.existsSync(localAppWatcher)) return localAppWatcher;
+  const parentWatcher = path.join(path.dirname(process.execPath), 'ag_watcher.exe');
+  if (fs.existsSync(parentWatcher)) return parentWatcher;
+  return localAppWatcher;
+}
+
+function ensureWatcherProcess() {
+  try {
+    const watcherExe = getWatcherExePath();
+    if (!fs.existsSync(watcherExe)) return;
+    const tasklist = child_process.execSync('tasklist /FI "IMAGENAME eq ag_watcher.exe" /FO CSV /NH', { encoding: 'utf8' });
+    if (!tasklist.toLowerCase().includes('ag_watcher.exe')) {
+      const child = child_process.spawn(watcherExe, [], {
+        detached: true,
+        stdio: 'ignore',
+        windowsHide: true
+      });
+      child.unref();
+      logMsg('Spawned ag_watcher.exe');
+    }
+  } catch (e) {
+    logMsg('ensureWatcherProcess error: ' + e);
+  }
+}
+
+function killWatcherProcess() {
+  try {
+    child_process.execSync('taskkill /F /IM ag_watcher.exe /T', { stdio: 'ignore' });
+    logMsg('Killed ag_watcher.exe');
+  } catch (_) {}
+}
+
+function updateWatcherRegistration(cfg) {
+  try {
+    const mode = cfg.antigravitySyncMode || 'manual';
+    const watcherExe = getWatcherExePath();
+
+    if (mode === 'sync_all' || mode === 'sync_start') {
+      cfg.petExePath = process.execPath;
+      saveMasterConfig(cfg);
+
+      if (fs.existsSync(watcherExe)) {
+        const regCmd = `reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" /v "GeminiPetWatcher" /t REG_SZ /d "\\"${watcherExe}\\"" /f`;
+        child_process.exec(regCmd, (err) => {
+          if (err) logMsg('reg add GeminiPetWatcher error: ' + err);
+          else logMsg('Registered GeminiPetWatcher in HKCU Run');
+        });
+        ensureWatcherProcess();
+      }
+    } else {
+      const regDelCmd = `reg delete "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" /v "GeminiPetWatcher" /f`;
+      child_process.exec(regDelCmd, () => {});
+      killWatcherProcess();
+    }
+  } catch (e) {
+    logMsg('updateWatcherRegistration error: ' + e);
+  }
 }
 
 function logMsg(msg) {
@@ -588,7 +659,7 @@ function registerIpc() {
       }
 
       const menuW = 280;
-      const menuH = 430;
+      const menuH = 465;
       const primaryDisplay = screen.getPrimaryDisplay();
       const { width: screenW, height: screenH } = primaryDisplay.workArea;
 
@@ -645,6 +716,7 @@ function registerIpc() {
   ipcMain.on('pet-config-changed', (event, cfg) => {
     try {
       const merged = saveMasterConfig(cfg);
+      updateWatcherRegistration(merged);
       if (petWin && !petWin.isDestroyed()) {
         petWin.webContents.send('pet-apply-config', merged);
       }
@@ -688,6 +760,11 @@ function registerIpc() {
   ipcMain.on('pet-quit', () => {
     logMsg('pet-quit received from IPC!');
     userExplicitlyClosed = true;
+    try {
+      const agPid = getAntigravityPid();
+      const sessionFile = path.join(userDataDir, 'session_state.json');
+      fs.writeFileSync(sessionFile, JSON.stringify({ suppressedPid: agPid }), 'utf8');
+    } catch (_) {}
     cleanExit('pet-quit-ipc');
   });
 }
@@ -783,6 +860,7 @@ function createDesktopPetWindow() {
     petWin.focus();
     petWin.setAlwaysOnTop(true);
     const initialConfig = loadMasterConfig();
+    updateWatcherRegistration(initialConfig);
     petWin.webContents.send('pet-apply-config', initialConfig);
     checkAntigravityAlive().then((alive) => {
       if (petWin && !petWin.isDestroyed()) {
@@ -804,6 +882,17 @@ function createDesktopPetWindow() {
       petWin.webContents.send('pet-antigravity-state', curr);
       if (curr) {
         sendQuota(petWin);
+      } else {
+        const cfg = loadMasterConfig();
+        if (cfg.antigravitySyncMode === 'sync_all' && !userExplicitlyClosed) {
+          logMsg('Antigravity closed and mode is sync_all. Closing GeminiPet.');
+          try {
+            petWin.webContents.send('pet-farewell-exit', '✦ 反重力已退出，小猫咪也去休息啦喵~');
+          } catch (_) {}
+          setTimeout(() => {
+            cleanExit('antigravity-exit-sync');
+          }, 1500);
+        }
       }
     }
   }, 2500);
