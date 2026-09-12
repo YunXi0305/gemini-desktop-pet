@@ -4,9 +4,10 @@
 > 100% 独立绿色运行 · 零侵入代码检测 · 真实配额同步 · 键盘连击伴舞 · 极致解压果冻触感
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078d7.svg)](https://github.com/)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078d7.svg)](https://github.com/YunXi0305/gemini-desktop-pet)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-success.svg)](https://github.com/YunXi0305/gemini-desktop-pet/releases)
 [![Runtime](https://img.shields.io/badge/Runtime-Electron%20Portable-47848f.svg)](https://www.electronjs.org/)
-[![Status](https://img.shields.io/badge/Zero--Intrusion-100%25-brightgreen.svg)](https://github.com/)
+[![Status](https://img.shields.io/badge/Zero--Intrusion-100%25-brightgreen.svg)](https://github.com/YunXi0305/gemini-desktop-pet)
 
 ---
 
@@ -42,12 +43,19 @@
 
 ---
 
+## 🤖 全 AI 生成声明与维护承诺
+
+- **100% 由 AI 协同构建**：本项目的所有内容（包括全部代码、架构设计、文档及说明）全部由 AI 生成。
+- **维护与反馈政策**：如有任何 Bug、兼容性问题或改进建议，欢迎提交 [Issues](https://github.com/YunXi0305/gemini-desktop-pet/issues) 反馈！作者会在 Gemini 额度充足的前提下及时修复与更新（**最低保障每周集中维护与修复一次**）。
+
+---
+
 ## 🚀 快速使用
 
 ### 方式一：下载即用（绿色免安装版，推荐）
 
-1. 前往 GitHub [Releases](../../releases) 页面下载最新版：  
-   `GeminiPet-v1.0.0-win-x64.zip`
+1. 前往 GitHub [Releases](https://github.com/YunXi0305/gemini-desktop-pet/releases) 页面下载最新版：  
+   👉 [**GeminiPet-v1.0.0-win-x64.zip**](https://github.com/YunXi0305/gemini-desktop-pet/releases/download/v1.0.0/GeminiPet-v1.0.0-win-x64.zip)
 2. 解压到电脑任意目录（如 `D:\Tools\GeminiPet\`）；
 3. 双击运行 **`GeminiPet.exe`** 即可立即唤醒哈基米！
 
@@ -61,7 +69,7 @@
 
 ```bash
 # 1. 克隆本仓库
-git clone https://github.com/your-username/gemini-pet.git
+git clone https://github.com/YunXi0305/gemini-desktop-pet.git
 cd gemini-pet
 
 # 2. 安装依赖
@@ -88,6 +96,15 @@ npm run pack
 
 ---
 
+## 🗺️ 后续路线图 (Roadmap)
+
+- [ ] **多模型额度透视**：目前专精支持 Google Gemini 配额读取，后续计划扩展对 Claude、OpenAI 等更多主流 AI 的配额感知与显示；
+- [ ] **更多互动姿态与装扮**：新增不同情绪立绘、换装系统与多套趣味动作姿态；
+- [ ] **个性化语音与音效包**：支持用户自定义音效包导入与桌面语音伴侣交互；
+- [ ] **跨平台适配**：探索 macOS / Linux 桌面透明看板娘支持。
+
+---
+
 ## 📁 目录结构说明
 
 ```text
@@ -96,7 +113,8 @@ gemini-pet/
 ├── pet.html            # 桌宠透明主视窗 HTML
 ├── gemini-pet.js       # 桌宠前端核心引擎 (74KB，骨骼姿态、物理引擎、穿透算法)
 ├── settings.html       # 独立毛玻璃右键设置面板
-├── key_watcher.exe     # 4KB 超轻量全局按键监听辅助进程
+├── key_watcher.exe     # 4KB 超轻量全局按键监听辅助进程 (及源码 key_watcher.cs)
+├── ag_watcher.exe      # 超轻量反重力状态监听守护进程 (及源码 ag_watcher.cs)
 ├── app.ico             # 应用程序与托盘高清图标
 ├── assets/             # 精修无白边透明立绘素材与音效
 │   ├── idle.png        # 端庄温柔站立形态
@@ -123,3 +141,4 @@ gemini-pet/
 ## 📄 开源许可证
 
 本项目基于 [MIT License](LICENSE) 开源发布。立绘与音效素材版权归原作者所有，仅供个人学习与开源陪伴使用。
+

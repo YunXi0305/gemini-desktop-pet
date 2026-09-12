@@ -67,6 +67,7 @@ const includeFiles = [
   'settings.html',
   'gemini-pet.js',
   'key_watcher.exe',
+  'key_watcher.cs',
   'ag_watcher.exe',
   'ag_watcher.cs',
   'app.ico',
@@ -83,13 +84,15 @@ includeFiles.forEach(f => {
   }
 });
 
-// Also copy ag_watcher.exe directly to root app directory next to GeminiPet.exe
-const rootWatcherSrc = path.join(projectDir, 'ag_watcher.exe');
-if (fs.existsSync(rootWatcherSrc)) {
-  try {
-    fs.copyFileSync(rootWatcherSrc, path.join(targetAppDir, 'ag_watcher.exe'));
-  } catch (_) {}
-}
+// Also copy ag_watcher.exe, README.md, LICENSE directly to root app directory next to GeminiPet.exe
+['ag_watcher.exe', 'README.md', 'LICENSE'].forEach(f => {
+  const rootSrc = path.join(projectDir, f);
+  if (fs.existsSync(rootSrc)) {
+    try {
+      fs.copyFileSync(rootSrc, path.join(targetAppDir, f));
+    } catch (_) {}
+  }
+});
 
 // Copy assets
 const assetsSrc = path.join(projectDir, 'assets');
