@@ -696,6 +696,7 @@
     });
 
     // Turn Cost Bubble (supports live streaming ticks and final summary)
+    var maxCostSeenInBubble = 0;
     function showCostBubble(amount, unit, isLive) {
       if (!bubbleOn || !turnCostOn) return;
       if (costBubbleTimer) { clearTimeout(costBubbleTimer); costBubbleTimer = null; }
@@ -715,8 +716,9 @@
       if (isLive) {
         labelEl.textContent = '✦ 正在思考与消耗:';
         labelEl.style.color = '#7c3aed';
-        if (typeof amount === 'number' && amount > 0) {
-          amountEl.textContent = amount.toLocaleString() + ' ' + (unit || 'tokens') + '...';
+        if (typeof amount === 'number') {
+          if (amount > maxCostSeenInBubble) maxCostSeenInBubble = amount;
+          amountEl.textContent = maxCostSeenInBubble > 0 ? (maxCostSeenInBubble.toLocaleString() + ' ' + (unit || 'tokens') + '...') : '计算中...';
         } else {
           amountEl.textContent = '计算中...';
         }
@@ -726,10 +728,12 @@
       } else {
         labelEl.textContent = '✦ 本轮对话总消耗:';
         labelEl.style.color = '#2563eb';
-        if (typeof amount === 'number') {
-          amountEl.textContent = unit ? (amount.toLocaleString() + ' ' + unit) : (amount.toLocaleString() + ' tokens');
+        var finalAmt = typeof amount === 'number' ? Math.max(maxCostSeenInBubble, amount) : amount;
+        maxCostSeenInBubble = 0; // reset for next conversation turn
+        if (typeof finalAmt === 'number') {
+          amountEl.textContent = unit ? (finalAmt.toLocaleString() + ' ' + unit) : (finalAmt.toLocaleString() + ' tokens');
         } else {
-          amountEl.textContent = String(amount || '--');
+          amountEl.textContent = String(finalAmt || '--');
         }
         amountEl.style.color = '#e0433f';
         bubbleBox.classList.add('dshwv-bubble-open');

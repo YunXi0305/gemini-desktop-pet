@@ -310,32 +310,46 @@ function sendQuota(win) {
   }).catch(() => {});
 }
 
+function getActiveTranscriptInfo() {
+  try {
+    const home = process.env.HOME || process.env.USERPROFILE || '';
+    const brainDir = path.join(home, '.gemini', 'antigravity', 'brain');
+    if (!fs.existsSync(brainDir)) return null;
+    const convs = fs.readdirSync(brainDir);
+    let bestFile = null;
+    let bestMtime = 0;
+    let bestSize = 0;
+    for (const cid of convs) {
+      const tFile = path.join(brainDir, cid, '.system_generated', 'logs', 'transcript.jsonl');
+      try {
+        const stat = fs.statSync(tFile);
+        if (stat.mtimeMs > bestMtime) {
+          bestMtime = stat.mtimeMs;
+          bestFile = tFile;
+          bestSize = stat.size;
+        }
+      } catch (_) {}
+    }
+    return bestFile ? { file: bestFile, mtimeMs: bestMtime, size: bestSize } : null;
+  } catch (_) {
+    return null;
+  }
+}
+
 function inspectAgentWork() {
   try {
     const now = Date.now();
-    const home = process.env.HOME || process.env.USERPROFILE || '';
-    const brainDir = path.join(home, '.gemini', 'antigravity', 'brain');
+    const activeInfo = getActiveTranscriptInfo();
     let working = false;
-    let foundFile = null;
-    let foundSize = 0;
+    let foundFile = activeInfo ? activeInfo.file : null;
+    let foundSize = activeInfo ? activeInfo.size : 0;
 
-    if (fs.existsSync(brainDir)) {
-      const convs = fs.readdirSync(brainDir);
-      for (const cid of convs) {
-        const tFile = path.join(brainDir, cid, '.system_generated', 'logs', 'transcript.jsonl');
-        try {
-          const stat = fs.statSync(tFile);
-          if (now - stat.mtimeMs < 1200) {
-            working = true;
-            foundFile = tFile;
-            foundSize = stat.size;
-            break;
-          }
-        } catch (_) {}
-      }
+    if (activeInfo && (now - activeInfo.mtimeMs < 2200)) {
+      working = true;
     }
 
     if (!working) {
+      const home = process.env.HOME || process.env.USERPROFILE || '';
       const logFile = process.platform === 'win32'
         ? path.join(process.env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'antigravity', 'logs', 'language_server.log')
         : (process.platform === 'darwin'
@@ -343,7 +357,7 @@ function inspectAgentWork() {
             : path.join(home, '.config', 'antigravity', 'logs', 'language_server.log'));
       try {
         const stat = fs.statSync(logFile);
-        if (now - stat.mtimeMs < 1200) {
+        if (now - stat.mtimeMs < 2200) {
           working = true;
         }
       } catch (_) {}
@@ -723,11 +737,11 @@ function createDesktopPetWindow() {
     }
   }, 30000);
 
-  // Periodic Agent Work State & Turn Cost Tracking (every 300ms)
+  // Periodic Agent Work State & Turn Cost Tracking (every 250ms)
   let lastWorkState = null;
   let activeTurnFile = null;
   let activeTurnStartSize = 0;
-  let lastLiveTokensSent = 0;
+  let maxTurnTokensSeen = 0;
 
   agentWorkInterval = setInterval(() => {
     if (petWin && !petWin.isDestroyed() && isAntigravityAlive) {
@@ -736,10 +750,10 @@ function createDesktopPetWindow() {
         const isWorking = info.working;
 
         if (isWorking && !lastWorkState) {
-          // Agent JUST STARTED working
+          // Agent JUST STARTED working (instantly detected!)
           activeTurnFile = info.foundFile;
           activeTurnStartSize = info.foundSize || 0;
-          lastLiveTokensSent = 0;
+          maxTurnTokensSeen = 0;
           petWin.webContents.send('pet-turn-cost', {
             amount: 0,
             unit: 'tokens',
@@ -757,10 +771,10 @@ function createDesktopPetWindow() {
               const delta = Math.max(0, curStat.size - activeTurnStartSize);
               if (delta > 0) {
                 const liveTokens = Math.max(15, Math.round(delta / 3.2));
-                if (Math.abs(liveTokens - lastLiveTokensSent) >= 20 || liveTokens > lastLiveTokensSent) {
-                  lastLiveTokensSent = liveTokens;
+                if (liveTokens > maxTurnTokensSeen) {
+                  maxTurnTokensSeen = liveTokens;
                   petWin.webContents.send('pet-turn-cost', {
-                    amount: liveTokens,
+                    amount: maxTurnTokensSeen,
                     unit: 'tokens',
                     isLive: true
                   });
@@ -776,17 +790,16 @@ function createDesktopPetWindow() {
               const curStat = fs.statSync(activeTurnFile);
               const delta = Math.max(0, curStat.size - activeTurnStartSize);
               if (delta > 0) {
-                // ~3.2 bytes per token average in JSON transcripts
                 tokens = Math.max(120, Math.round(delta / 3.2));
               }
             } catch (_) {}
           }
-          if (!tokens) {
-            tokens = lastLiveTokensSent > 0 ? lastLiveTokensSent : (Math.floor(Math.random() * 600) + 750);
-          }
+          // Monotonic guarantee: final tokens can NEVER be less than the maximum live tokens seen!
+          const finalTotal = Math.max(maxTurnTokensSeen, tokens);
+          const reportTokens = finalTotal > 0 ? finalTotal : (Math.floor(Math.random() * 600) + 750);
 
           petWin.webContents.send('pet-turn-cost', {
-            amount: tokens,
+            amount: reportTokens,
             unit: 'tokens',
             isLive: false,
             isFinal: true
@@ -794,7 +807,7 @@ function createDesktopPetWindow() {
           sendQuota(petWin);
           activeTurnFile = null;
           activeTurnStartSize = 0;
-          lastLiveTokensSent = 0;
+          maxTurnTokensSeen = 0;
         }
 
         if (isWorking !== lastWorkState) {
@@ -803,7 +816,7 @@ function createDesktopPetWindow() {
         }
       } catch (_) {}
     }
-  }, 300);
+  }, 250);
 
   petWin.webContents.on('render-process-gone', (e, details) => {
     logMsg('petWin render-process-gone: ' + JSON.stringify(details));
