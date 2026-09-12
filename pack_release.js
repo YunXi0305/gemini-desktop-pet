@@ -5,7 +5,9 @@ const { execSync } = require('child_process');
 const projectDir = path.resolve(__dirname);
 const rootDistDir = path.resolve(__dirname, '..', 'dist');
 const targetAppDir = path.join(rootDistDir, 'GeminiPet');
-const electronDist = 'C:\\Users\\29705\\AppData\\Local\\hermes\\hermes-agent\\apps\\desktop\\node_modules\\electron\\dist';
+const localElectronDist = path.join(projectDir, 'node_modules', 'electron', 'dist');
+const fallbackElectronDist = 'C:\\Users\\29705\\AppData\\Local\\hermes\\hermes-agent\\apps\\desktop\\node_modules\\electron\\dist';
+const electronDist = fs.existsSync(localElectronDist) ? localElectronDist : fallbackElectronDist;
 
 console.log('=== Building Gemini Pet Standalone Portable Edition ===');
 

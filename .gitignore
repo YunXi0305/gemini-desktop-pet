@@ -1,7 +1,6 @@
-﻿node_modules/
+node_modules/
 dist/
 *.log
 .DS_Store
 Thumbs.db
-images_base64.json
-sounds_base64.json
+
