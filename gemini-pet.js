@@ -222,12 +222,21 @@
     scaleNumber.value = '7';
 
     scaleInput.addEventListener('pointerdown', function () { root.style.transition = 'none'; });
-    scaleInput.addEventListener('input', function () { setScale(scaleInput.value); });
-    scaleInput.addEventListener('change', function () { root.style.transition = ''; });
+    scaleInput.addEventListener('input', function () { setScale(scaleInput.value, false, false); });
+    scaleInput.addEventListener('change', function () {
+      root.style.transition = '';
+      saveConfig(true);
+    });
+
+    scaleNumber.addEventListener('pointerdown', function () { root.style.transition = 'none'; });
     scaleNumber.addEventListener('input', function () {
-      var v = Math.round(Number(scaleNumber.value));
-      var s = MIN_SCALE + Math.max(0, Math.min(20, v) - 1) * (MAX_SCALE - MIN_SCALE) / 19;
-      setScale(s);
+      var v = Math.max(1, Math.min(20, Math.round(Number(scaleNumber.value) || 7)));
+      var s = (v - 1) * 0.1 + 0.6;
+      setScale(s, false, true);
+    });
+    scaleNumber.addEventListener('change', function () {
+      root.style.transition = '';
+      saveConfig(true);
     });
 
     var soundSelect = document.createElement('select');
@@ -1026,11 +1035,16 @@
     }
 
     // Dynamic Scale Adjustment (Electron + Web responsive)
-    function setScale(v) {
+    function setScale(v, fromRemote, fromNumberInput) {
       var next = Math.round(Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number(v))) * 10) / 10;
       state.scale = next;
-      scaleInput.value = String(next);
-      scaleNumber.value = String(Math.round((next - MIN_SCALE) / ((MAX_SCALE - MIN_SCALE) / 19)) + 1);
+      if (scaleInput && scaleInput.value !== String(next)) {
+        scaleInput.value = String(next);
+      }
+      if (scaleNumber && !fromNumberInput) {
+        var lvl = Math.round((next - 0.6) * 10) + 1;
+        scaleNumber.value = String(Math.max(1, Math.min(20, lvl)));
+      }
 
       var pxW = Math.round(260 * next);
       var pxH = Math.round(360 * next);
@@ -1038,14 +1052,17 @@
       root.style.setProperty('--gpet-base', pxW + 'px');
 
       if (ipcRenderer) {
-        ipcRenderer.send('pet-set-scale', next, state.h === 'left');
+        if (!fromRemote) {
+          ipcRenderer.send('pet-set-scale', next, state.h === 'left');
+        }
       } else {
         root.style.width = pxW + 'px';
         root.style.height = pxH + 'px';
         settle();
       }
-      setTimeout(updateBaseUnits, 30);
-      saveConfig();
+      if (!fromRemote) {
+        saveConfig(false);
+      }
     }
 
     function setVol(v) {
@@ -1119,7 +1136,8 @@
       }
     }
 
-    function saveConfig() {
+    var saveConfigTimer = null;
+    function doSaveConfig() {
       try {
         var cfg = {
           scale: state.scale,
@@ -1136,6 +1154,20 @@
         };
         localStorage.setItem('gemini-pet-config', JSON.stringify(cfg));
       } catch (_) {}
+    }
+
+    function saveConfig(immediate) {
+      if (immediate) {
+        if (saveConfigTimer) { clearTimeout(saveConfigTimer); saveConfigTimer = null; }
+        doSaveConfig();
+      } else {
+        if (!saveConfigTimer) {
+          saveConfigTimer = setTimeout(function () {
+            saveConfigTimer = null;
+            doSaveConfig();
+          }, 300);
+        }
+      }
     }
 
     function loadConfig() {
@@ -1991,7 +2023,9 @@
       });
       ipcRenderer.on('pet-apply-config', function (e, c) {
         if (!c) return;
-        if (c.scale !== undefined && Number(c.scale) !== state.scale) setScale(c.scale);
+        if (c.scale !== undefined && Math.abs(Number(c.scale) - state.scale) > 0.05) {
+          setScale(c.scale, true);
+        }
         if (c.soundVol !== undefined) setVol(c.soundVol);
         if (c.soundSet) setSoundSet(c.soundSet);
         if (c.quotaView) setQuotaView(c.quotaView);

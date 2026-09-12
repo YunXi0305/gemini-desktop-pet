@@ -290,7 +290,8 @@
     function syncUI() {
       const s = Number(cfg.scale) || 1.2;
       scaleInput.value = String(s);
-      scaleNumber.value = String(Math.round((s - MIN_SCALE) / ((MAX_SCALE - MIN_SCALE) / 19)) + 1);
+      const lvl = Math.round((s - 0.6) * 10) + 1;
+      scaleNumber.value = String(Math.max(1, Math.min(20, lvl)));
 
       soundSelect.value = cfg.soundSet || 'duck';
 
@@ -309,30 +310,52 @@
       turnCostCloseInput.disabled = !turnCostToggle.checked;
     }
 
-    function saveAndBroadcast(scaleChanged) {
+    let saveDebounceTimer = null;
+    function saveAndBroadcast(immediate) {
       try {
         localStorage.setItem('gemini-pet-config', JSON.stringify(cfg));
       } catch (_) {}
-      if (ipcRenderer) {
-        ipcRenderer.send('pet-config-changed', cfg);
-        if (scaleChanged) {
-          ipcRenderer.send('pet-set-scale', cfg.scale);
+      if (immediate) {
+        if (saveDebounceTimer) { clearTimeout(saveDebounceTimer); saveDebounceTimer = null; }
+        if (ipcRenderer) ipcRenderer.send('pet-config-changed', cfg);
+      } else {
+        if (!saveDebounceTimer) {
+          saveDebounceTimer = setTimeout(() => {
+            saveDebounceTimer = null;
+            if (ipcRenderer) ipcRenderer.send('pet-config-changed', cfg);
+          }, 250);
         }
       }
     }
 
+    function applyScale(s, fromNumber) {
+      const clamped = Math.round(Math.min(MAX_SCALE, Math.max(MIN_SCALE, s)) * 10) / 10;
+      cfg.scale = clamped;
+      if (!fromNumber) {
+        const lvl = Math.round((clamped - 0.6) * 10) + 1;
+        scaleNumber.value = String(Math.max(1, Math.min(20, lvl)));
+      } else {
+        scaleInput.value = String(clamped);
+      }
+      if (ipcRenderer) {
+        ipcRenderer.send('pet-set-scale', clamped);
+      }
+      saveAndBroadcast(false);
+    }
+
     scaleInput.addEventListener('input', () => {
-      const s = Math.round(Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number(scaleInput.value))) * 10) / 10;
-      cfg.scale = s;
-      scaleNumber.value = String(Math.round((s - MIN_SCALE) / ((MAX_SCALE - MIN_SCALE) / 19)) + 1);
+      applyScale(Number(scaleInput.value), false);
+    });
+    scaleInput.addEventListener('change', () => {
       saveAndBroadcast(true);
     });
 
     scaleNumber.addEventListener('input', () => {
-      const v = Math.round(Number(scaleNumber.value));
-      const s = Math.round((MIN_SCALE + Math.max(0, Math.min(20, v) - 1) * (MAX_SCALE - MIN_SCALE) / 19) * 10) / 10;
-      cfg.scale = s;
-      scaleInput.value = String(s);
+      const v = Math.max(1, Math.min(20, Math.round(Number(scaleNumber.value) || 7)));
+      const s = (v - 1) * 0.1 + 0.6;
+      applyScale(s, true);
+    });
+    scaleNumber.addEventListener('change', () => {
       saveAndBroadcast(true);
     });
 

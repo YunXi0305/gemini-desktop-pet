@@ -44,11 +44,29 @@ function loadMasterConfig() {
   return Object.assign({}, DEFAULT_CONFIG);
 }
 
-function saveMasterConfig(cfg) {
+let saveConfigTimer = null;
+let pendingMasterConfig = null;
+
+function saveMasterConfig(cfg, immediate = false) {
   try {
     const current = loadMasterConfig();
     const merged = Object.assign({}, current, cfg);
-    fs.writeFileSync(configFile, JSON.stringify(merged, null, 2), 'utf8');
+    pendingMasterConfig = merged;
+    if (immediate) {
+      if (saveConfigTimer) { clearTimeout(saveConfigTimer); saveConfigTimer = null; }
+      fs.writeFileSync(configFile, JSON.stringify(merged, null, 2), 'utf8');
+    } else {
+      if (!saveConfigTimer) {
+        saveConfigTimer = setTimeout(() => {
+          saveConfigTimer = null;
+          try {
+            if (pendingMasterConfig) {
+              fs.writeFileSync(configFile, JSON.stringify(pendingMasterConfig, null, 2), 'utf8');
+            }
+          } catch (_) {}
+        }, 300);
+      }
+    }
     return merged;
   } catch (_) {}
   return cfg;
@@ -63,9 +81,27 @@ function loadPosition() {
   return null;
 }
 
-function savePosition(x, y) {
+let savePosTimer = null;
+let pendingPos = null;
+
+function savePosition(x, y, immediate = false) {
   try {
-    fs.writeFileSync(posFile, JSON.stringify({ x, y }), 'utf8');
+    pendingPos = { x: Math.round(x), y: Math.round(y) };
+    if (immediate) {
+      if (savePosTimer) { clearTimeout(savePosTimer); savePosTimer = null; }
+      fs.writeFileSync(posFile, JSON.stringify(pendingPos), 'utf8');
+    } else {
+      if (!savePosTimer) {
+        savePosTimer = setTimeout(() => {
+          savePosTimer = null;
+          try {
+            if (pendingPos) {
+              fs.writeFileSync(posFile, JSON.stringify(pendingPos), 'utf8');
+            }
+          } catch (_) {}
+        }, 400);
+      }
+    }
   } catch (_) {}
 }
 
@@ -601,6 +637,20 @@ function createSettingsWindow() {
 
 // 7. IPC Registration
 let ipcRegistered = false;
+let currentPetBounds = null;
+let scaleResizeTimer = null;
+let targetScaleReq = null;
+
+function getSafePetBounds() {
+  if (!petWin || petWin.isDestroyed()) return null;
+  if (!currentPetBounds) {
+    const [x, y] = petWin.getPosition();
+    const [w, h] = petWin.getSize();
+    currentPetBounds = { x: Math.round(x), y: Math.round(y), width: w, height: h };
+  }
+  return currentPetBounds;
+}
+
 function registerIpc() {
   if (ipcRegistered) return;
   ipcRegistered = true;
@@ -608,8 +658,10 @@ function registerIpc() {
   ipcMain.on('pet-move-by', (event, dx, dy) => {
     try {
       if (petWin && !petWin.isDestroyed()) {
-        const [x, y] = petWin.getPosition();
-        petWin.setPosition(Math.round(x + dx), Math.round(y + dy));
+        const b = getSafePetBounds();
+        b.x = Math.round(b.x + dx);
+        b.y = Math.round(b.y + dy);
+        petWin.setPosition(b.x, b.y);
       }
     } catch (_) {}
   });
@@ -619,6 +671,9 @@ function registerIpc() {
       if (petWin && !petWin.isDestroyed()) {
         const nx = Math.round(x);
         const ny = Math.round(y);
+        const b = getSafePetBounds();
+        b.x = nx;
+        b.y = ny;
         petWin.setPosition(nx, ny);
         savePosition(nx, ny);
       }
@@ -627,22 +682,35 @@ function registerIpc() {
 
   ipcMain.on('pet-set-scale', (event, scale, isLeft) => {
     try {
-      if (petWin && !petWin.isDestroyed()) {
-        const s = Math.max(0.6, Math.min(2.5, Number(scale) || 1.2));
-        const baseW = 290;
-        const baseH = 390;
-        const newW = Math.max(260, Math.round(baseW * s));
-        const newH = Math.max(340, Math.round(baseH * s));
-        const [curX, curY] = petWin.getPosition();
-        const [curW, curH] = petWin.getSize();
-        const newX = isLeft ? curX : (curX + curW - newW);
-        const newY = curY + curH - newH;
-        petWin.setBounds({
-          x: Math.round(newX),
-          y: Math.round(newY),
-          width: newW,
-          height: newH
-        });
+      if (!petWin || petWin.isDestroyed()) return;
+      const s = Math.max(0.6, Math.min(2.5, Number(scale) || 1.2));
+      targetScaleReq = { s, isLeft: !!isLeft };
+
+      if (!scaleResizeTimer) {
+        scaleResizeTimer = setTimeout(() => {
+          scaleResizeTimer = null;
+          if (!targetScaleReq || !petWin || petWin.isDestroyed()) return;
+          const { s: targetS, isLeft: targetIsLeft } = targetScaleReq;
+          const baseW = 290;
+          const baseH = 390;
+          const newW = Math.max(260, Math.round(baseW * targetS));
+          const newH = Math.max(340, Math.round(baseH * targetS));
+
+          const b = getSafePetBounds();
+          const anchorRight = b.x + b.width;
+          const anchorBottom = b.y + b.height;
+
+          const newX = targetIsLeft ? b.x : (anchorRight - newW);
+          const newY = anchorBottom - newH;
+
+          b.x = Math.round(newX);
+          b.y = Math.round(newY);
+          b.width = newW;
+          b.height = newH;
+
+          petWin.setBounds(b);
+          savePosition(b.x, b.y);
+        }, 16);
       }
     } catch (_) {}
   });
@@ -772,6 +840,20 @@ function registerIpc() {
 function cleanExit(reason) {
   logMsg('cleanExit called! reason=' + reason);
   try {
+    if (saveConfigTimer) {
+      clearTimeout(saveConfigTimer);
+      saveConfigTimer = null;
+      if (pendingMasterConfig) {
+        try { fs.writeFileSync(configFile, JSON.stringify(pendingMasterConfig, null, 2), 'utf8'); } catch (_) {}
+      }
+    }
+    if (savePosTimer) {
+      clearTimeout(savePosTimer);
+      savePosTimer = null;
+      if (pendingPos) {
+        try { fs.writeFileSync(posFile, JSON.stringify(pendingPos), 'utf8'); } catch (_) {}
+      }
+    }
     stopKeyWatcher();
     if (quotaInterval) clearInterval(quotaInterval);
     if (agentWorkInterval) clearInterval(agentWorkInterval);
@@ -836,6 +918,8 @@ function createDesktopPetWindow() {
       webSecurity: false
     }
   });
+
+  currentPetBounds = { x: startX, y: startY, width: petW, height: petH };
 
   petWin.setAlwaysOnTop(true);
   petWin.show();
