@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>✦ Gemini 哈基米设置</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .settings-card {
+      margin: 8px;
+      width: calc(100% - 16px);
+      height: calc(100% - 16px);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(37, 99, 235, 0.25);
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.22);
+      color-scheme: light;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0.98;
+    }
+    .title-row {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e3a8a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .title-text {
+      flex: 1;
+    }
+    .close-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 14px;
+      color: #64748b;
+      padding: 0 4px;
+      line-height: 1;
+      font-weight: 700;
+    }
+    .close-btn:hover {
+      color: #1e293b;
+    }
+    .menu-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 4px 0;
+      color: #1e293b;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .menu-label {
+      color: #1e293b;
+      font-size: 12px;
+      flex-shrink: 0;
+      min-width: 48px;
+    }
+    .range-input {
+      flex: 1;
+      min-width: 0;
+      accent-color: #2563eb;
+      cursor: pointer;
+    }
+    .number-input {
+      width: 46px;
+      border: 1px solid rgba(37, 99, 235, 0.3);
+      border-radius: 6px;
+      padding: 2px 4px;
+      font-size: 12px;
+      color: #1e293b;
+      background: rgba(255, 255, 255, 0.9);
+      box-sizing: border-box;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .number-input:disabled {
+      opacity: .4;
+      background: rgba(0, 0, 0, 0.06);
+      cursor: not-allowed;
+    }
+    .select-input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid rgba(37, 99, 235, 0.3);
+      border-radius: 6px;
+      background: rgba(37, 99, 235, 0.06);
+      color: #1e3a8a;
+      font-size: 12px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-weight: 500;
+      outline: none;
+    }
+    .select-input:hover {
+      background: rgba(37, 99, 235, 0.12);
+    }
+    .check-input {
+      width: 16px;
+      height: 16px;
+      accent-color: #2563eb;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+    .sep {
+      height: 1px;
+      background: rgba(37, 99, 235, 0.15);
+      margin: 6px 0;
+    }
+    .vol-pct {
+      width: 38px;
+      text-align: right;
+      color: #64748b;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .quit-btn {
+      width: 100%;
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      text-align: center;
+      box-sizing: border-box;
+      transition: background .15s ease, border-color .15s ease;
+      margin-top: 6px;
+    }
+    .quit-btn:hover {
+      background: rgba(239, 68, 68, 0.22);
+      border-color: #ef4444;
+    }
+  </style>
+</head>
+<body>
+  <div class="settings-card">
+    <div class="title-row">
+      <span>✦</span>
+      <span class="title-text">Gemini 哈基米设置</span>
+      <button type="button" class="close-btn" id="closeBtn" title="关闭设置">✕</button>
+    </div>
+
+    <div class="menu-row">
+      <span class="menu-label">大小</span>
+      <input type="range" class="range-input" id="scaleInput" min="0.6" max="2.5" step="0.1" value="1.2">
+      <input type="number" class="number-input" id="scaleNumber" min="1" max="20" step="1" value="7">
+    </div>
+
+    <div class="menu-row">
+      <span class="menu-label">音效</span>
+      <select class="select-input" id="soundSelect">
+        <option value="duck">小黄鸭 (挤压音)</option>
+        <option value="mute">静音</option>
+      </select>
+    </div>
+
+    <div class="menu-row">
+      <span class="menu-label">音量</span>
+      <input type="range" class="range-input" id="volInput" min="0" max="1" step="0.05" value="0.9">
+      <span class="vol-pct" id="volPct">90%</span>
+    </div>
+
+    <div class="menu-row">
+      <span class="menu-label">配额</span>
+      <select class="select-input" id="quotaViewSelect">
+        <option value="5h">5小时额度 (常用)</option>
+        <option value="weekly">每周总额度</option>
+        <option value="alternate">双额度交替轮播</option>
+      </select>
+    </div>
+
+    <div class="menu-row">
+      <span class="menu-label">状态</span>
+      <select class="select-input" id="workStateSelect">
+        <option value="auto">自动跟随 (工作吹茶/空闲站立)</option>
+        <option value="typing">疯狂码字 (打字敲键盘)</option>
+        <option value="chill">吹茶品茗 (工作中)</option>
+        <option value="idle">端庄站立 (经典待机)</option>
+        <option value="happy">跪姿萌爪 (开心元气)</option>
+        <option value="dragged">悬空拎起 (呆萌被提)</option>
+      </select>
+    </div>
+
+    <div class="menu-row">
+      <span class="menu-label">气泡</span>
+      <input type="checkbox" class="check-input" id="bubbleToggle">
+    </div>
+
+    <div class="menu-row">
+      <span class="menu-label">打字工友</span>
+      <input type="checkbox" class="check-input" id="typingToggle">
+      <span style="color: #64748b; font-size: 11px;">打字狂暴敲键盘联动</span>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="menu-row">
+      <span class="menu-label">对话消耗</span>
+      <input type="checkbox" class="check-input" id="turnCostToggle">
+      <span style="flex: 1;"></span>
+      <span class="menu-label" style="min-width: auto;">自动关闭</span>
+      <input type="number" class="number-input" id="turnCostCloseInput" min="0" step="1" value="5" title="填 0 表示不自动关闭">
+      <span class="menu-label" style="min-width: auto;">秒</span>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="menu-row" style="margin: 0;">
+      <button type="button" class="quit-btn" id="quitBtn">✕ 退出桌宠</button>
+    </div>
+  </div>
+
+  <script>
+    let ipcRenderer = null;
+    try {
+      ipcRenderer = require('electron').ipcRenderer;
+    } catch (_) {}
+
+    const MIN_SCALE = 0.6;
+    const MAX_SCALE = 2.5;
+
+    const scaleInput = document.getElementById('scaleInput');
+    const scaleNumber = document.getElementById('scaleNumber');
+    const soundSelect = document.getElementById('soundSelect');
+    const volInput = document.getElementById('volInput');
+    const volPct = document.getElementById('volPct');
+    const quotaViewSelect = document.getElementById('quotaViewSelect');
+    const workStateSelect = document.getElementById('workStateSelect');
+    const bubbleToggle = document.getElementById('bubbleToggle');
+    const typingToggle = document.getElementById('typingToggle');
+    const turnCostToggle = document.getElementById('turnCostToggle');
+    const turnCostCloseInput = document.getElementById('turnCostCloseInput');
+    const closeBtn = document.getElementById('closeBtn');
+    const quitBtn = document.getElementById('quitBtn');
+
+    function loadConfig() {
+      try {
+        const raw = localStorage.getItem('gemini-pet-config');
+        if (raw) return JSON.parse(raw);
+      } catch (_) {}
+      return {
+        scale: 1.2,
+        soundVol: 0.9,
+        soundSet: 'duck',
+        quotaView: '5h',
+        bubbleOn: true,
+        typingOn: true,
+        turnCostOn: true,
+        turnCostCloseMs: 5000,
+        workStateMode: 'auto'
+      };
+    }
+
+    let cfg = loadConfig();
+
+    function syncUI() {
+      const s = Number(cfg.scale) || 1.2;
+      scaleInput.value = String(s);
+      scaleNumber.value = String(Math.round((s - MIN_SCALE) / ((MAX_SCALE - MIN_SCALE) / 19)) + 1);
+
+      soundSelect.value = cfg.soundSet || 'duck';
+
+      const vol = cfg.soundVol !== undefined ? Number(cfg.soundVol) : 0.9;
+      volInput.value = String(vol);
+      volPct.textContent = Math.round(vol * 100) + '%';
+
+      quotaViewSelect.value = cfg.quotaView || '5h';
+      workStateSelect.value = cfg.workStateMode || 'auto';
+
+      bubbleToggle.checked = cfg.bubbleOn !== undefined ? !!cfg.bubbleOn : true;
+      typingToggle.checked = cfg.typingOn !== undefined ? !!cfg.typingOn : true;
+      turnCostToggle.checked = cfg.turnCostOn !== undefined ? !!cfg.turnCostOn : true;
+      turnCostCloseInput.value = String(cfg.turnCostCloseMs ? Math.round(cfg.turnCostCloseMs / 1000) : 5);
+      turnCostCloseInput.disabled = !turnCostToggle.checked;
+    }
+
+    function saveAndBroadcast(scaleChanged) {
+      try {
+        localStorage.setItem('gemini-pet-config', JSON.stringify(cfg));
+      } catch (_) {}
+      if (ipcRenderer) {
+        ipcRenderer.send('pet-config-changed', cfg);
+        if (scaleChanged) {
+          ipcRenderer.send('pet-set-scale', cfg.scale);
+        }
+      }
+    }
+
+    scaleInput.addEventListener('input', () => {
+      const s = Math.round(Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number(scaleInput.value))) * 10) / 10;
+      cfg.scale = s;
+      scaleNumber.value = String(Math.round((s - MIN_SCALE) / ((MAX_SCALE - MIN_SCALE) / 19)) + 1);
+      saveAndBroadcast(true);
+    });
+
+    scaleNumber.addEventListener('input', () => {
+      const v = Math.round(Number(scaleNumber.value));
+      const s = Math.round((MIN_SCALE + Math.max(0, Math.min(20, v) - 1) * (MAX_SCALE - MIN_SCALE) / 19) * 10) / 10;
+      cfg.scale = s;
+      scaleInput.value = String(s);
+      saveAndBroadcast(true);
+    });
+
+    soundSelect.addEventListener('change', () => {
+      cfg.soundSet = soundSelect.value;
+      saveAndBroadcast(false);
+    });
+
+    volInput.addEventListener('input', () => {
+      const v = Math.round(Math.min(1, Math.max(0, Number(volInput.value))) * 100) / 100;
+      cfg.soundVol = v;
+      volPct.textContent = Math.round(v * 100) + '%';
+      saveAndBroadcast(false);
+    });
+
+    quotaViewSelect.addEventListener('change', () => {
+      cfg.quotaView = quotaViewSelect.value;
+      saveAndBroadcast(false);
+    });
+
+    workStateSelect.addEventListener('change', () => {
+      cfg.workStateMode = workStateSelect.value;
+      saveAndBroadcast(false);
+    });
+
+    bubbleToggle.addEventListener('change', () => {
+      cfg.bubbleOn = bubbleToggle.checked;
+      saveAndBroadcast(false);
+    });
+
+    typingToggle.addEventListener('change', () => {
+      cfg.typingOn = typingToggle.checked;
+      saveAndBroadcast(false);
+    });
+
+    turnCostToggle.addEventListener('change', () => {
+      cfg.turnCostOn = turnCostToggle.checked;
+      turnCostCloseInput.disabled = !cfg.turnCostOn;
+      saveAndBroadcast(false);
+    });
+
+    turnCostCloseInput.addEventListener('input', () => {
+      const n = Math.max(0, Math.round(Number(turnCostCloseInput.value) || 0));
+      cfg.turnCostCloseMs = n * 1000;
+      saveAndBroadcast(false);
+    });
+
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (ipcRenderer) {
+        ipcRenderer.send('pet-close-settings');
+      } else {
+        window.close();
+      }
+    });
+
+    quitBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (ipcRenderer) {
+        ipcRenderer.send('pet-quit');
+      }
+    });
+
+    // Re-sync when window gains focus
+    window.addEventListener('focus', () => {
+      cfg = loadConfig();
+      syncUI();
+    });
+
+    if (ipcRenderer) {
+      ipcRenderer.on('pet-init-settings', (e, config) => {
+        if (config) {
+          cfg = Object.assign({}, cfg, config);
+          try {
+            localStorage.setItem('gemini-pet-config', JSON.stringify(cfg));
+          } catch (_) {}
+          syncUI();
+        }
+      });
+    }
+
+    syncUI();
+  </script>
+</body>
+</html>

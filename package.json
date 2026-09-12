@@ -1,0 +1,21 @@
+{
+  "name": "gemini-pet",
+  "version": "1.0.0",
+  "description": "✦ Gemini 哈基米 - 超轻量透明桌面宠物 & 反重力AI伴侣 (Standalone Edition)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "node pack_release.js"
+  },
+  "keywords": [
+    "gemini",
+    "antigravity",
+    "desktop-pet",
+    "electron"
+  ],
+  "devDependencies": {
+    "electron": "^33.0.0"
+  },
+  "author": "Antigravity Community",
+  "license": "MIT"
+}
