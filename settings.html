@@ -312,18 +312,21 @@
 
     let saveDebounceTimer = null;
     function saveAndBroadcast(immediate) {
-      try {
-        localStorage.setItem('gemini-pet-config', JSON.stringify(cfg));
-      } catch (_) {}
       if (immediate) {
         if (saveDebounceTimer) { clearTimeout(saveDebounceTimer); saveDebounceTimer = null; }
+        try {
+          localStorage.setItem('gemini-pet-config', JSON.stringify(cfg));
+        } catch (_) {}
         if (ipcRenderer) ipcRenderer.send('pet-config-changed', cfg);
       } else {
         if (saveDebounceTimer) clearTimeout(saveDebounceTimer);
         saveDebounceTimer = setTimeout(() => {
           saveDebounceTimer = null;
+          try {
+            localStorage.setItem('gemini-pet-config', JSON.stringify(cfg));
+          } catch (_) {}
           if (ipcRenderer) ipcRenderer.send('pet-config-changed', cfg);
-        }, 500);
+        }, 400);
       }
     }
 
@@ -360,14 +363,20 @@
 
     soundSelect.addEventListener('change', () => {
       cfg.soundSet = soundSelect.value;
-      saveAndBroadcast(false);
+      saveAndBroadcast(true);
     });
 
     volInput.addEventListener('input', () => {
       const v = Math.round(Math.min(1, Math.max(0, Number(volInput.value))) * 100) / 100;
       cfg.soundVol = v;
       volPct.textContent = Math.round(v * 100) + '%';
+      if (ipcRenderer) {
+        ipcRenderer.send('pet-set-volume', v);
+      }
       saveAndBroadcast(false);
+    });
+    volInput.addEventListener('change', () => {
+      saveAndBroadcast(true);
     });
 
     quotaViewSelect.addEventListener('change', () => {

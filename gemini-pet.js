@@ -261,8 +261,8 @@
 
     var volPct = document.createElement('span');
     volPct.className = 'gpet-volpct';
-    volPct.textContent = '90%';
-    volInput.addEventListener('input', function () { setVol(volInput.value); });
+    volInput.addEventListener('input', function () { setVol(volInput.value, false); });
+    volInput.addEventListener('change', function () { saveConfig(true); });
 
     // Quota View Select
     var quotaViewSelect = document.createElement('select');
@@ -1065,14 +1065,20 @@
       }
     }
 
-    function setVol(v) {
+    function setVol(v, fromRemote) {
       soundVol = Math.round(Math.min(1, Math.max(0, Number(v))) * 100) / 100;
       soundOn = soundVol > 0;
-      volInput.value = String(soundVol);
-      volPct.textContent = Math.round(soundVol * 100) + '%';
+      if (volInput && volInput.value !== String(soundVol)) {
+        volInput.value = String(soundVol);
+      }
+      if (volPct) {
+        volPct.textContent = Math.round(soundVol * 100) + '%';
+      }
       if (pressAudio) pressAudio.volume = soundVol;
       if (releaseAudio) releaseAudio.volume = soundVol;
-      saveConfig();
+      if (!fromRemote) {
+        saveConfig(false);
+      }
     }
 
     function setSoundSet(v) {
@@ -1161,12 +1167,11 @@
         if (saveConfigTimer) { clearTimeout(saveConfigTimer); saveConfigTimer = null; }
         doSaveConfig();
       } else {
-        if (!saveConfigTimer) {
-          saveConfigTimer = setTimeout(function () {
-            saveConfigTimer = null;
-            doSaveConfig();
-          }, 300);
-        }
+        if (saveConfigTimer) clearTimeout(saveConfigTimer);
+        saveConfigTimer = setTimeout(function () {
+          saveConfigTimer = null;
+          doSaveConfig();
+        }, 400);
       }
     }
 
@@ -2025,12 +2030,17 @@
           setScale(s, true);
         }
       });
+      ipcRenderer.on('pet-apply-volume', function (e, vol) {
+        if (vol !== undefined) {
+          setVol(vol, true);
+        }
+      });
       ipcRenderer.on('pet-apply-config', function (e, c) {
         if (!c) return;
         if (c.scale !== undefined && Math.abs(Number(c.scale) - state.scale) > 0.05) {
           setScale(c.scale, true);
         }
-        if (c.soundVol !== undefined) setVol(c.soundVol);
+        if (c.soundVol !== undefined) setVol(c.soundVol, true);
         if (c.soundSet) setSoundSet(c.soundSet);
         if (c.quotaView) setQuotaView(c.quotaView);
         if (c.bubbleOn !== undefined) setBubbleOn(c.bubbleOn);

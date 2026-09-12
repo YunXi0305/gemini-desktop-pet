@@ -712,6 +712,10 @@ function registerIpc() {
           const newX = targetIsLeft ? b.x : (anchorRight - newW);
           const newY = anchorBottom - newH;
 
+          if (b.x === Math.round(newX) && b.y === Math.round(newY) && b.width === newW && b.height === newH) {
+            return;
+          }
+
           b.x = Math.round(newX);
           b.y = Math.round(newY);
           b.width = newW;
@@ -719,7 +723,15 @@ function registerIpc() {
 
           petWin.setBounds(b);
           savePosition(b.x, b.y);
-        }, 16);
+        }, 50);
+      }
+    } catch (_) {}
+  });
+
+  ipcMain.on('pet-set-volume', (event, vol) => {
+    try {
+      if (petWin && !petWin.isDestroyed()) {
+        petWin.webContents.send('pet-apply-volume', vol);
       }
     } catch (_) {}
   });
