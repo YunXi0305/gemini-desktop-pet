@@ -9,14 +9,12 @@ const electronDist = 'C:\\Users\\29705\\AppData\\Local\\hermes\\hermes-agent\\ap
 
 console.log('=== Building Gemini Pet Standalone Portable Edition ===');
 
-// 1. Clean / Create target directories
-if (fs.existsSync(targetAppDir)) {
-  fs.rmSync(targetAppDir, { recursive: true, force: true });
+// 1. Ensure target directory exists
+if (!fs.existsSync(targetAppDir)) {
+  fs.mkdirSync(targetAppDir, { recursive: true });
 }
-fs.mkdirSync(targetAppDir, { recursive: true });
 
-// 2. Copy Electron binaries
-console.log('Copying Electron runtime binaries from:', electronDist);
+// 2. Copy Electron runtime binaries if not already present
 function copyRecursive(src, dest) {
   const stat = fs.statSync(src);
   if (stat.isDirectory()) {
@@ -29,17 +27,21 @@ function copyRecursive(src, dest) {
   }
 }
 
-fs.readdirSync(electronDist).forEach(file => {
-  const src = path.join(electronDist, file);
-  if (file === 'electron.exe') {
-    fs.copyFileSync(src, path.join(targetAppDir, 'GeminiPet.exe'));
-    console.log('Renamed electron.exe -> GeminiPet.exe');
-  } else if (file === 'resources') {
-    // We will create custom resources/app
-  } else {
-    copyRecursive(src, path.join(targetAppDir, file));
-  }
-});
+const exeFile = path.join(targetAppDir, 'GeminiPet.exe');
+if (!fs.existsSync(exeFile)) {
+  console.log('Copying Electron runtime binaries from:', electronDist);
+  fs.readdirSync(electronDist).forEach(file => {
+    const src = path.join(electronDist, file);
+    if (file === 'electron.exe') {
+      fs.copyFileSync(src, exeFile);
+      console.log('Renamed electron.exe -> GeminiPet.exe');
+    } else if (file === 'resources') {
+      // Handled below
+    } else {
+      copyRecursive(src, path.join(targetAppDir, file));
+    }
+  });
+}
 
 // 3. Assemble resources/app
 const appResourcesDir = path.join(targetAppDir, 'resources', 'app');
@@ -71,7 +73,9 @@ const includeFiles = [
 includeFiles.forEach(f => {
   const src = path.join(projectDir, f);
   if (fs.existsSync(src)) {
-    fs.copyFileSync(src, path.join(appResourcesDir, f));
+    try {
+      fs.copyFileSync(src, path.join(appResourcesDir, f));
+    } catch (_) {}
   }
 });
 

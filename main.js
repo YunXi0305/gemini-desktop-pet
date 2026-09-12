@@ -336,6 +336,15 @@ function getActiveTranscriptInfo() {
   }
 }
 
+function estimateTextTokens(text) {
+  if (!text || typeof text !== 'string') return 0;
+  const cjkMatches = text.match(/[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/g);
+  const cjkCount = cjkMatches ? cjkMatches.length : 0;
+  const nonCjkLen = text.length - cjkCount;
+  // Gemini/BPE token weights: ~1.25 tokens per Chinese char, ~1 token per 3.5 non-CJK chars
+  return Math.round(cjkCount * 1.25 + nonCjkLen / 3.5);
+}
+
 function calculateLastTurnTokens(transcriptFile) {
   try {
     if (!transcriptFile || !fs.existsSync(transcriptFile)) return 0;
@@ -359,11 +368,32 @@ function calculateLastTurnTokens(transcriptFile) {
       } catch (_) {}
     }
     if (userIndex === -1) return 0;
-    let totalBytes = 0;
+
+    let totalTokens = 0;
+    // Count user prompt input tokens
+    try {
+      const userObj = JSON.parse(lines[userIndex]);
+      totalTokens += estimateTextTokens(userObj.content || '');
+    } catch (_) {}
+
+    // Count assistant output text, thinking, and tool execution data
     for (let i = userIndex + 1; i < lines.length; i++) {
-      totalBytes += lines[i].length;
+      try {
+        const obj = JSON.parse(lines[i]);
+        if (obj.content) {
+          totalTokens += estimateTextTokens(obj.content);
+        }
+        if (obj.thinking) {
+          totalTokens += estimateTextTokens(obj.thinking);
+        }
+        if (obj.tool_calls && Array.isArray(obj.tool_calls)) {
+          totalTokens += estimateTextTokens(JSON.stringify(obj.tool_calls));
+        }
+      } catch (_) {
+        totalTokens += estimateTextTokens(lines[i]);
+      }
     }
-    return Math.max(120, Math.round(totalBytes / 3.2));
+    return Math.max(120, totalTokens);
   } catch (_) {
     return 0;
   }
