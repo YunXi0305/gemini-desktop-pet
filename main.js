@@ -295,7 +295,16 @@ async function checkAntigravityAlive() {
       isAntigravityAlive = false;
       return false;
     }
-    const content = fs.readFileSync(logFile, 'utf8');
+    const stat = fs.statSync(logFile);
+    const readSize = Math.min(stat.size, 65536);
+    let content = '';
+    if (readSize > 0) {
+      const buf = Buffer.alloc(readSize);
+      const fd = fs.openSync(logFile, 'r');
+      fs.readSync(fd, buf, 0, readSize, stat.size - readSize);
+      fs.closeSync(fd);
+      content = buf.toString('utf8');
+    }
     const matches = [...content.matchAll(/listening on \w+ port at (\d+)/gi)];
     if (matches.length > 0) {
       const ports = [...new Set(matches.map(m => Number(m[1])).filter(Boolean))].reverse();
@@ -422,8 +431,25 @@ function sendQuota(win) {
   }).catch(() => {});
 }
 
+let cachedTranscriptInfo = null;
+let lastBrainScanTime = 0;
+
 function getActiveTranscriptInfo() {
   try {
+    const now = Date.now();
+    // Fast path: if we already have an active file and scanned recently (< 5000ms), only stat this single file!
+    if (cachedTranscriptInfo && (now - lastBrainScanTime < 5000)) {
+      try {
+        const stat = fs.statSync(cachedTranscriptInfo.file);
+        cachedTranscriptInfo.mtimeMs = stat.mtimeMs;
+        cachedTranscriptInfo.size = stat.size;
+        return cachedTranscriptInfo;
+      } catch (_) {
+        cachedTranscriptInfo = null;
+      }
+    }
+
+    lastBrainScanTime = now;
     const home = process.env.HOME || process.env.USERPROFILE || '';
     const brainDir = path.join(home, '.gemini', 'antigravity', 'brain');
     if (!fs.existsSync(brainDir)) return null;
@@ -442,7 +468,8 @@ function getActiveTranscriptInfo() {
         }
       } catch (_) {}
     }
-    return bestFile ? { file: bestFile, mtimeMs: bestMtime, size: bestSize } : null;
+    cachedTranscriptInfo = bestFile ? { file: bestFile, mtimeMs: bestMtime, size: bestSize } : null;
+    return cachedTranscriptInfo;
   } catch (_) {
     return null;
   }
@@ -749,6 +776,7 @@ function registerIpc() {
       if (!petWin || petWin.isDestroyed()) return;
       const s = Math.max(0.6, Math.min(2.5, Number(scale) || 1.2));
       targetScaleReq = { s, isLeft: isLeft !== undefined ? !!isLeft : undefined };
+      saveMasterConfig({ scale: s });
 
       try {
         petWin.webContents.send('pet-apply-scale', s);
@@ -766,6 +794,7 @@ function registerIpc() {
     try {
       if (scale !== undefined) {
         targetScaleReq = { s: Math.max(0.6, Math.min(2.5, Number(scale) || 1.2)), isLeft: isLeft !== undefined ? !!isLeft : undefined };
+        saveMasterConfig({ scale: targetScaleReq.s });
       }
       if (scaleResizeTimer) {
         clearTimeout(scaleResizeTimer);
@@ -777,8 +806,10 @@ function registerIpc() {
 
   ipcMain.on('pet-set-volume', (event, vol) => {
     try {
+      const v = Math.round(Math.min(1, Math.max(0, Number(vol))) * 100) / 100;
+      saveMasterConfig({ soundVol: v });
       if (petWin && !petWin.isDestroyed()) {
-        petWin.webContents.send('pet-apply-volume', vol);
+        petWin.webContents.send('pet-apply-volume', v);
       }
     } catch (_) {}
   });
@@ -924,8 +955,8 @@ function cleanExit(reason) {
     }
     stopKeyWatcher();
     if (quotaInterval) clearInterval(quotaInterval);
-    if (agentWorkInterval) clearInterval(agentWorkInterval);
-    if (antigravityProbeInterval) clearInterval(antigravityProbeInterval);
+    if (agentWorkInterval) clearTimeout(agentWorkInterval);
+    if (antigravityProbeInterval) clearTimeout(antigravityProbeInterval);
     if (settingsWin && !settingsWin.isDestroyed()) settingsWin.destroy();
     if (petWin && !petWin.isDestroyed()) petWin.destroy();
     if (tray && !tray.isDestroyed()) tray.destroy();
@@ -1025,29 +1056,38 @@ function createDesktopPetWindow() {
     });
   });
 
-  // Antigravity Autonomy Probe (checks every 2.5s)
-  antigravityProbeInterval = setInterval(async () => {
-    if (!petWin || petWin.isDestroyed()) return;
-    const prev = isAntigravityAlive;
-    const curr = await checkAntigravityAlive();
-    if (curr !== prev && petWin && !petWin.isDestroyed()) {
-      petWin.webContents.send('pet-antigravity-state', curr);
-      if (curr) {
-        sendQuota(petWin);
-      } else {
-        const cfg = loadMasterConfig();
-        if (cfg.antigravitySyncMode === 'sync_all' && !userExplicitlyClosed) {
-          logMsg('Antigravity closed and mode is sync_all. Closing GeminiPet.');
-          try {
-            petWin.webContents.send('pet-farewell-exit', '✦ 反重力已退出，小猫咪也去休息啦喵~');
-          } catch (_) {}
-          setTimeout(() => {
-            cleanExit('antigravity-exit-sync');
-          }, 1500);
+  // Antigravity Autonomy Probe (checks every 2.5s, self-scheduling, no overlap)
+  async function runAntigravityProbe() {
+    try {
+      if (!petWin || petWin.isDestroyed()) return;
+      const prev = isAntigravityAlive;
+      const curr = await checkAntigravityAlive();
+      if (curr !== prev && petWin && !petWin.isDestroyed()) {
+        petWin.webContents.send('pet-antigravity-state', curr);
+        if (curr) {
+          sendQuota(petWin);
+        } else {
+          const cfg = loadMasterConfig();
+          if (cfg.antigravitySyncMode === 'sync_all' && !userExplicitlyClosed) {
+            logMsg('Antigravity closed and mode is sync_all. Closing GeminiPet.');
+            try {
+              petWin.webContents.send('pet-farewell-exit', '✦ 反重力已退出，小猫咪也去休息啦喵~');
+            } catch (_) {}
+            setTimeout(() => {
+              cleanExit('antigravity-exit-sync');
+            }, 1500);
+            return;
+          }
         }
       }
+    } catch (_) {
+    } finally {
+      if (petWin && !petWin.isDestroyed()) {
+        antigravityProbeInterval = setTimeout(runAntigravityProbe, 2500);
+      }
     }
-  }, 2500);
+  }
+  antigravityProbeInterval = setTimeout(runAntigravityProbe, 2500);
 
   // Periodic Quota Refresh (every 30s)
   quotaInterval = setInterval(() => {
@@ -1056,13 +1096,13 @@ function createDesktopPetWindow() {
     }
   }, 30000);
 
-  // Periodic Agent Work State & Turn Cost Tracking (every 250ms)
+  // Periodic Agent Work State & Turn Cost Tracking (self-scheduling, no overlap)
   let lastWorkState = null;
   let activeTurnFile = null;
 
-  agentWorkInterval = setInterval(() => {
-    if (petWin && !petWin.isDestroyed() && isAntigravityAlive) {
-      try {
+  function runAgentWorkCheck() {
+    try {
+      if (petWin && !petWin.isDestroyed() && isAntigravityAlive) {
         const info = inspectAgentWork();
         const isWorking = info.working;
 
@@ -1074,7 +1114,6 @@ function createDesktopPetWindow() {
           });
         } else if (!isWorking && lastWorkState) {
           // Agent JUST FINISHED the entire turn!
-          // Accurately sum all segments, tool calls & text from the user's prompt
           let tokens = calculateLastTurnTokens(activeTurnFile || info.foundFile);
           if (!tokens) {
             tokens = Math.floor(Math.random() * 600) + 850;
@@ -1094,9 +1133,15 @@ function createDesktopPetWindow() {
           lastWorkState = isWorking;
           petWin.webContents.send('pet-agent-work-state', isWorking);
         }
-      } catch (_) {}
+      }
+    } catch (_) {
+    } finally {
+      if (petWin && !petWin.isDestroyed()) {
+        agentWorkInterval = setTimeout(runAgentWorkCheck, 400);
+      }
     }
-  }, 250);
+  }
+  agentWorkInterval = setTimeout(runAgentWorkCheck, 500);
 
   petWin.webContents.on('render-process-gone', (e, details) => {
     logMsg('petWin render-process-gone: ' + JSON.stringify(details));

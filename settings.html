@@ -337,10 +337,13 @@
       scaleNumber.value = String(Math.max(1, Math.min(20, lvl)));
       scaleInput.value = String(clamped);
 
+      try {
+        localStorage.setItem('gemini-pet-config', JSON.stringify(cfg));
+      } catch (_) {}
+
       if (ipcRenderer) {
         ipcRenderer.send('pet-set-scale', clamped);
       }
-      saveAndBroadcast(true);
     }
 
     let isScaleDragging = false;
@@ -422,10 +425,14 @@
       cfg.soundVol = clamped;
       volPct.textContent = Math.round(clamped * 100) + '%';
       volInput.value = String(clamped);
+
+      try {
+        localStorage.setItem('gemini-pet-config', JSON.stringify(cfg));
+      } catch (_) {}
+
       if (ipcRenderer) {
         ipcRenderer.send('pet-set-volume', clamped);
       }
-      saveAndBroadcast(true);
     }
 
     let isVolDragging = false;
