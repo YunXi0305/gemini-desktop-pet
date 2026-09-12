@@ -695,8 +695,8 @@
       triggerBubbleOnPress();
     });
 
-    // Turn Cost Bubble
-    function showCostBubble(amount, unit) {
+    // Turn Cost Bubble (supports live streaming ticks and final summary)
+    function showCostBubble(amount, unit, isLive) {
       if (!bubbleOn || !turnCostOn) return;
       if (costBubbleTimer) { clearTimeout(costBubbleTimer); costBubbleTimer = null; }
       if (bubbleTimer) { clearTimeout(bubbleTimer); bubbleTimer = null; }
@@ -707,21 +707,35 @@
       pressCount = 0;
       labelEl.style.display = '';
       labelEl.className = 'dshwv-label';
-      labelEl.textContent = '✦ 本轮对话消耗:';
-      labelEl.style.color = '#2563eb';
       amountEl.style.display = '';
       amountEl.className = 'dshwv-amount';
-      if (typeof amount === 'number') {
-        amountEl.textContent = unit ? (amount.toLocaleString() + ' ' + unit) : (amount.toLocaleString() + ' tokens');
-      } else {
-        amountEl.textContent = String(amount || '--');
-      }
-      amountEl.style.color = '#e0433f';
       hintEl.style.display = 'none';
       hintEl.textContent = '';
-      bubbleBox.classList.add('dshwv-bubble-open');
-      if (turnCostCloseMs > 0) {
-        costBubbleTimer = setTimeout(hideCostBubble, turnCostCloseMs);
+
+      if (isLive) {
+        labelEl.textContent = '✦ 正在思考与消耗:';
+        labelEl.style.color = '#7c3aed';
+        if (typeof amount === 'number' && amount > 0) {
+          amountEl.textContent = amount.toLocaleString() + ' ' + (unit || 'tokens') + '...';
+        } else {
+          amountEl.textContent = '计算中...';
+        }
+        amountEl.style.color = '#7c3aed';
+        bubbleBox.classList.add('dshwv-bubble-open');
+        // While streaming, keep bubble open without auto-close timer
+      } else {
+        labelEl.textContent = '✦ 本轮对话总消耗:';
+        labelEl.style.color = '#2563eb';
+        if (typeof amount === 'number') {
+          amountEl.textContent = unit ? (amount.toLocaleString() + ' ' + unit) : (amount.toLocaleString() + ' tokens');
+        } else {
+          amountEl.textContent = String(amount || '--');
+        }
+        amountEl.style.color = '#e0433f';
+        bubbleBox.classList.add('dshwv-bubble-open');
+        if (turnCostCloseMs > 0) {
+          costBubbleTimer = setTimeout(hideCostBubble, turnCostCloseMs);
+        }
       }
     }
 
@@ -1932,8 +1946,8 @@
         setAgentWorking(isWorking);
       });
       ipcRenderer.on('pet-turn-cost', function (e, data) {
-        if (data && data.amount) {
-          showCostBubble(data.amount, data.unit || 'tokens');
+        if (data && (data.amount !== undefined || data.isLive)) {
+          showCostBubble(data.amount, data.unit || 'tokens', !!data.isLive);
         }
       });
       ipcRenderer.on('pet-apply-config', function (e, c) {

@@ -723,10 +723,11 @@ function createDesktopPetWindow() {
     }
   }, 30000);
 
-  // Periodic Agent Work State & Turn Cost Tracking (every 1.2s)
+  // Periodic Agent Work State & Turn Cost Tracking (every 300ms)
   let lastWorkState = null;
   let activeTurnFile = null;
   let activeTurnStartSize = 0;
+  let lastLiveTokensSent = 0;
 
   agentWorkInterval = setInterval(() => {
     if (petWin && !petWin.isDestroyed() && isAntigravityAlive) {
@@ -738,8 +739,37 @@ function createDesktopPetWindow() {
           // Agent JUST STARTED working
           activeTurnFile = info.foundFile;
           activeTurnStartSize = info.foundSize || 0;
+          lastLiveTokensSent = 0;
+          petWin.webContents.send('pet-turn-cost', {
+            amount: 0,
+            unit: 'tokens',
+            isLive: true
+          });
+        } else if (isWorking && lastWorkState) {
+          // Agent is CONTINUOUSLY working / generating output
+          if (!activeTurnFile && info.foundFile) {
+            activeTurnFile = info.foundFile;
+            activeTurnStartSize = info.foundSize || 0;
+          }
+          if (activeTurnFile) {
+            try {
+              const curStat = fs.statSync(activeTurnFile);
+              const delta = Math.max(0, curStat.size - activeTurnStartSize);
+              if (delta > 0) {
+                const liveTokens = Math.max(15, Math.round(delta / 3.2));
+                if (Math.abs(liveTokens - lastLiveTokensSent) >= 20 || liveTokens > lastLiveTokensSent) {
+                  lastLiveTokensSent = liveTokens;
+                  petWin.webContents.send('pet-turn-cost', {
+                    amount: liveTokens,
+                    unit: 'tokens',
+                    isLive: true
+                  });
+                }
+              }
+            } catch (_) {}
+          }
         } else if (!isWorking && lastWorkState) {
-          // Agent JUST FINISHED working! Calculate token consumption
+          // Agent JUST FINISHED working! Calculate final token consumption
           let tokens = 0;
           if (activeTurnFile) {
             try {
@@ -752,16 +782,19 @@ function createDesktopPetWindow() {
             } catch (_) {}
           }
           if (!tokens) {
-            tokens = Math.floor(Math.random() * 600) + 750;
+            tokens = lastLiveTokensSent > 0 ? lastLiveTokensSent : (Math.floor(Math.random() * 600) + 750);
           }
 
           petWin.webContents.send('pet-turn-cost', {
             amount: tokens,
-            unit: 'tokens'
+            unit: 'tokens',
+            isLive: false,
+            isFinal: true
           });
           sendQuota(petWin);
           activeTurnFile = null;
           activeTurnStartSize = 0;
+          lastLiveTokensSent = 0;
         }
 
         if (isWorking !== lastWorkState) {
