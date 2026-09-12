@@ -35,59 +35,59 @@
   };
 
   var css = [
-    '.dshwv-root{position:fixed;right:20px;bottom:20px;--dshw-scale:1.2;--dshw-base:calc(260px * var(--dshw-scale));width:var(--dshw-base);height:calc(var(--dshw-base) * 1.385);pointer-events:none;user-select:none;-webkit-user-select:none;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;transition:left .16s ease,top .16s ease,transform .3s ease}',
-    '.dshwv-root.dshwv-left{transform:scaleX(-1)}',
-    '.dshwv-root.dshwv-dragging{cursor:grabbing;transition:none !important}',
-    '.dshwv-root.dshwv-dragging .dshwv-body{transition:none !important;transform:none !important}',
-    '.dshwv-body{position:absolute;left:0;top:0;width:100%;height:100%}',
-    '@keyframes dshwv-jelly{0%{transform:scaleX(1.24) scaleY(0.76)} 24%{transform:scaleX(0.82) scaleY(1.22)} 44%{transform:scaleX(1.12) scaleY(0.90)} 64%{transform:scaleX(0.96) scaleY(1.04)} 82%{transform:scaleX(1.02) scaleY(0.98)} 100%{transform:scale(1,1)}}',
-    '@keyframes dshwv-breathe{0%,100%{transform:scale(1,1)} 50%{transform:scale(1.018,0.982)}}',
-    '.dshwv-breathe{animation:dshwv-breathe 3.6s ease-in-out infinite !important}',
-    '@keyframes dshwv-typing-wobble{0%,100%{transform:translateY(0) scale(1,1)} 50%{transform:translateY(2.2px) scale(1.018,0.982)}}',
-    '.dshwv-typing-anim{animation:dshwv-typing-wobble .28s cubic-bezier(0.35,0,0.25,1) infinite !important}',
-    '.dshwv-combo-badge{position:absolute;right:8%;top:32%;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;font-weight:900;font-size:12px;padding:3px 8px;border-radius:12px;box-shadow:0 4px 12px rgba(236,72,153,0.45);pointer-events:none;z-index:90;transform:scale(0.8) translateY(0);opacity:0;transition:transform .12s cubic-bezier(.34,1.56,.64,1),opacity .18s ease;font-style:italic;text-shadow:0 1px 2px rgba(0,0,0,0.3)}',
-    '.dshwv-combo-badge.dshwv-combo-active{opacity:1;transform:scale(1.08) translateY(-4px)}',
-    '.dshwv-combo-badge.dshwv-combo-fever{background:linear-gradient(135deg,#f59e0b,#ef4444);box-shadow:0 6px 16px rgba(239,68,68,0.55);animation:dshwv-combo-shake .14s infinite alternate}',
-    '@keyframes dshwv-combo-shake{0%{transform:scale(1.15) rotate(-3deg)} 100%{transform:scale(1.22) rotate(3deg)}}',
-    '.dshwv-img{position:absolute;right:0;bottom:0;width:62%;height:62%;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none;object-fit:contain;filter:drop-shadow(0 6px 16px rgba(15,23,42,0.18));transform-origin:50% 98%;transition:transform .15s cubic-bezier(0.2,0.8,0.4,1)}',
-    '.dshwv-img.dshwv-jelly, .dshwv-body.dshwv-jelly{animation:dshwv-jelly .55s cubic-bezier(0.25,1,0.5,1) forwards !important;transition:none !important}',
-    '.dshwv-img.dshwv-squished, .dshwv-body.dshwv-squished{transform:scaleX(1.24) scaleY(0.76) !important;transition:transform .08s cubic-bezier(0.2,0,0,1) !important}',
-    '@keyframes dshwv-heart-float{0%{opacity:0;transform:translateY(0) scale(0.6) rotate(0deg)} 25%{opacity:1;transform:translateY(-16px) scale(1.15) rotate(-10deg)} 75%{opacity:0.9;transform:translateY(-45px) scale(1) rotate(8deg)} 100%{opacity:0;transform:translateY(-68px) scale(0.7) rotate(-5deg)}}',
-    '.dshwv-heart{position:absolute;pointer-events:none;font-size:22px;line-height:1;animation:dshwv-heart-float 1.1s cubic-bezier(0.2,0.8,0.4,1) forwards;z-index:100;user-select:none;filter:drop-shadow(0 2px 8px rgba(236,72,153,0.45))}',
-    '.dshwv-bubble{position:absolute;left:0;top:0;width:100%;aspect-ratio:1026/700;pointer-events:none;z-index:1;--dshw-u:calc(var(--dshw-base) / 1026);opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s}',
-    '.dshwv-bubble.dshwv-bubble-open{opacity:1;visibility:visible;transition:opacity .2s ease,visibility 0s}',
-    '.dshwv-bubble svg{display:block;width:100%;height:100%;pointer-events:none;filter:drop-shadow(0 8px 24px rgba(32,49,112,0.22))}',
-    '.dshwv-bubble svg path,.dshwv-bubble svg ellipse{pointer-events:none;cursor:pointer}',
-    '.dshwv-bubble.dshwv-bubble-open svg path,.dshwv-bubble.dshwv-bubble-open svg ellipse{pointer-events:visiblePainted}',
-    '.dshwv-bubble .dshwv-bshape,.dshwv-bubble .dshwv-b1,.dshwv-bubble .dshwv-b2{opacity:0;transform:scale(.7);transform-box:fill-box;transform-origin:50% 50%;transition:opacity .2s ease,transform .2s ease}',
-    '.dshwv-bubble.dshwv-bubble-open .dshwv-bshape,.dshwv-bubble.dshwv-bubble-open .dshwv-b1,.dshwv-bubble.dshwv-bubble-open .dshwv-b2{opacity:1;transform:none}',
-    '.dshwv-bubble.dshwv-bubble-open .dshwv-b2{transition-delay:0s}',
-    '.dshwv-bubble.dshwv-bubble-open .dshwv-b1{transition-delay:.13s}',
-    '.dshwv-bubble.dshwv-bubble-open .dshwv-bshape{transition-delay:.26s}',
-    '.dshwv-bubble .dshwv-bshape{transition-delay:.1s}',
-    '.dshwv-bubble .dshwv-b1{transition-delay:.2s}',
-    '.dshwv-bubble .dshwv-b2{transition-delay:.3s}',
-    '.dshwv-text{position:absolute;left:44.25%;top:38%;transform:translate(-50%,-50%);text-align:center;color:#1e3a8a;line-height:1.2;white-space:nowrap;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .16s ease,transform .3s ease;width:66%;max-width:calc(var(--dshw-u) * 520);box-sizing:border-box}',
-    '.dshwv-bubble.dshwv-bubble-open .dshwv-text{opacity:1;visibility:visible;transition:opacity .16s ease .36s,transform .3s ease}',
-    '.dshwv-bubble:not(.dshwv-bubble-open) .dshwv-text{opacity:0 !important;visibility:hidden !important}',
-    '.dshwv-root.dshwv-left .dshwv-text{transform:translate(-50%,-50%) scaleX(-1)}',
-    '.dshwv-label{font-size:calc(var(--dshw-u) * 48);font-weight:700;letter-spacing:.03em;color:#2563eb}',
-    '.dshwv-amount{font-size:calc(var(--dshw-u) * 88);font-weight:800;line-height:1.08;color:#0f172a;letter-spacing:-0.02em}',
-    '.dshwv-period{font-size:calc(var(--dshw-u) * 76);font-weight:800;line-height:1.05}',
-    '.dshwv-wrap{white-space:normal;max-width:calc(var(--dshw-u) * 450);line-height:1.32;font-size:calc(var(--dshw-u) * 42);margin:0 auto;word-break:break-word}',
-    '.dshwv-hint{font-size:calc(var(--dshw-u) * 40);color:#64748b;letter-spacing:.02em;margin-top:calc(var(--dshw-u) * 8);min-height:calc(var(--dshw-u) * 48);line-height:1.15;font-weight:500}',
-    '.dshwv-menu{position:fixed;min-width:210px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;background:rgba(255,255,255,0.96);backdrop-filter:blur(16px);border:1px solid rgba(37,99,235,0.25);border-radius:12px;padding:10px 12px;opacity:0;transform:scale(.92) translateY(-6px);transition:opacity .18s ease,transform .2s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:100000;box-shadow:0 12px 32px rgba(15,23,42,0.22);color-scheme:light;box-sizing:border-box}',
-    '.dshwv-menu.dshwv-menu-open{opacity:1;transform:scale(1) translateY(0);pointer-events:auto}',
-    '.dshwv-menu-title{font-size:13px;font-weight:700;color:#1e3a8a;margin-bottom:8px;display:flex;align-items:center;gap:6px}',
-    '.dshwv-menu-row{display:flex;align-items:center;gap:8px;margin:6px 0;color:#1e293b;font-size:12px;white-space:nowrap}',
-    '.dshwv-range{flex:1;min-width:0;accent-color:#2563eb}',
-    '.dshwv-number{width:46px;border:1px solid rgba(37,99,235,0.3);border-radius:6px;padding:2px 4px;font-size:12px;color:#1e293b;background:#fff;box-sizing:border-box;text-align:center}',
-    '.dshwv-number:disabled{opacity:.4;background:rgba(0,0,0,0.06);cursor:not-allowed}',
-    '.dshwv-sound{flex:1;border:1px solid rgba(37,99,235,0.3);border-radius:6px;background:rgba(37,99,235,0.06);color:#1e3a8a;font-size:12px;padding:4px 6px;cursor:pointer;font-weight:500}',
-    '.dshwv-sound:hover{background:rgba(37,99,235,0.12)}',
-    '.dshwv-check{width:16px;height:16px;accent-color:#2563eb;cursor:pointer;flex:0 0 auto}',
-    '.dshwv-menu-sep{height:1px;background:rgba(37,99,235,0.15);margin:8px 0}',
-    '.dshwv-volpct{width:38px;text-align:right;color:#64748b;font-size:11px}'
+    '.gpet-root{position:fixed;right:20px;bottom:20px;--gpet-scale:1.2;--gpet-base:calc(260px * var(--gpet-scale));width:var(--gpet-base);height:calc(var(--gpet-base) * 1.385);pointer-events:none;user-select:none;-webkit-user-select:none;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;transition:left .16s ease,top .16s ease,transform .3s ease}',
+    '.gpet-root.gpet-left{transform:scaleX(-1)}',
+    '.gpet-root.gpet-dragging{cursor:grabbing;transition:none !important}',
+    '.gpet-root.gpet-dragging .gpet-body{transition:none !important;transform:none !important}',
+    '.gpet-body{position:absolute;left:0;top:0;width:100%;height:100%}',
+    '@keyframes gpet-jelly{0%{transform:scaleX(1.22) scaleY(0.78)} 24%{transform:scaleX(0.82) scaleY(1.22)} 44%{transform:scaleX(1.12) scaleY(0.90)} 64%{transform:scaleX(0.96) scaleY(1.04)} 82%{transform:scaleX(1.02) scaleY(0.98)} 100%{transform:scale(1,1)}}',
+    '@keyframes gpet-breathe{0%,100%{transform:scale(1,1)} 50%{transform:scale(1.018,0.982)}}',
+    '.gpet-breathe{animation:gpet-breathe 3.6s ease-in-out infinite !important}',
+    '@keyframes gpet-typing-wobble{0%,100%{transform:translateY(0) scale(1,1)} 50%{transform:translateY(2.2px) scale(1.018,0.982)}}',
+    '.gpet-typing-anim{animation:gpet-typing-wobble .28s cubic-bezier(0.35,0,0.25,1) infinite !important}',
+    '.gpet-combo-badge{position:absolute;right:8%;top:32%;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;font-weight:900;font-size:12px;padding:3px 8px;border-radius:12px;box-shadow:0 4px 12px rgba(236,72,153,0.45);pointer-events:none;z-index:90;transform:scale(0.8) translateY(0);opacity:0;transition:transform .12s cubic-bezier(.34,1.56,.64,1),opacity .18s ease;font-style:italic;text-shadow:0 1px 2px rgba(0,0,0,0.3)}',
+    '.gpet-combo-badge.gpet-combo-active{opacity:1;transform:scale(1.08) translateY(-4px)}',
+    '.gpet-combo-badge.gpet-combo-fever{background:linear-gradient(135deg,#f59e0b,#ef4444);box-shadow:0 6px 16px rgba(239,68,68,0.55);animation:gpet-combo-shake .14s infinite alternate}',
+    '@keyframes gpet-combo-shake{0%{transform:scale(1.15) rotate(-3deg)} 100%{transform:scale(1.22) rotate(3deg)}}',
+    '.gpet-img{position:absolute;right:0;bottom:0;width:62%;height:62%;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none;object-fit:contain;filter:drop-shadow(0 6px 16px rgba(15,23,42,0.18));transform-origin:50% 98%;transition:transform .15s cubic-bezier(0.2,0.8,0.4,1)}',
+    '.gpet-img.gpet-jelly, .gpet-body.gpet-jelly{animation:gpet-jelly .55s cubic-bezier(0.25,1,0.5,1) forwards !important;transition:none !important}',
+    '.gpet-img.gpet-squished, .gpet-body.gpet-squished{transform:scaleX(1.22) scaleY(0.78) !important;transition:transform .08s cubic-bezier(0.2,0,0,1) !important}',
+    '@keyframes gpet-heart-float{0%{opacity:0;transform:translateY(0) scale(0.6) rotate(0deg)} 25%{opacity:1;transform:translateY(-16px) scale(1.15) rotate(-10deg)} 75%{opacity:0.9;transform:translateY(-45px) scale(1) rotate(8deg)} 100%{opacity:0;transform:translateY(-68px) scale(0.7) rotate(-5deg)}}',
+    '.gpet-heart{position:absolute;pointer-events:none;font-size:22px;line-height:1;animation:gpet-heart-float 1.1s cubic-bezier(0.2,0.8,0.4,1) forwards;z-index:100;user-select:none;filter:drop-shadow(0 2px 8px rgba(236,72,153,0.45))}',
+    '.gpet-bubble{position:absolute;left:0;top:0;width:100%;aspect-ratio:1026/700;pointer-events:none;z-index:1;--gpet-u:calc(var(--gpet-base) / 1026);opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s}',
+    '.gpet-bubble.gpet-bubble-open{opacity:1;visibility:visible;transition:opacity .2s ease,visibility 0s}',
+    '.gpet-bubble svg{display:block;width:100%;height:100%;pointer-events:none;filter:drop-shadow(0 8px 24px rgba(32,49,112,0.22))}',
+    '.gpet-bubble svg path,.gpet-bubble svg ellipse{pointer-events:none;cursor:pointer}',
+    '.gpet-bubble.gpet-bubble-open svg path,.gpet-bubble.gpet-bubble-open svg ellipse{pointer-events:visiblePainted}',
+    '.gpet-bubble .gpet-bshape,.gpet-bubble .gpet-b1,.gpet-bubble .gpet-b2{opacity:0;transform:scale(.7);transform-box:fill-box;transform-origin:50% 50%;transition:opacity .2s ease,transform .2s ease}',
+    '.gpet-bubble.gpet-bubble-open .gpet-bshape,.gpet-bubble.gpet-bubble-open .gpet-b1,.gpet-bubble.gpet-bubble-open .gpet-b2{opacity:1;transform:none}',
+    '.gpet-bubble.gpet-bubble-open .gpet-b2{transition-delay:0s}',
+    '.gpet-bubble.gpet-bubble-open .gpet-b1{transition-delay:.13s}',
+    '.gpet-bubble.gpet-bubble-open .gpet-bshape{transition-delay:.26s}',
+    '.gpet-bubble .gpet-bshape{transition-delay:.1s}',
+    '.gpet-bubble .gpet-b1{transition-delay:.2s}',
+    '.gpet-bubble .gpet-b2{transition-delay:.3s}',
+    '.gpet-text{position:absolute;left:44.25%;top:38%;transform:translate(-50%,-50%);text-align:center;color:#1e3a8a;line-height:1.2;white-space:nowrap;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .16s ease,transform .3s ease;width:66%;max-width:calc(var(--gpet-u) * 520);box-sizing:border-box}',
+    '.gpet-bubble.gpet-bubble-open .gpet-text{opacity:1;visibility:visible;transition:opacity .16s ease .36s,transform .3s ease}',
+    '.gpet-bubble:not(.gpet-bubble-open) .gpet-text{opacity:0 !important;visibility:hidden !important}',
+    '.gpet-root.gpet-left .gpet-text{transform:translate(-50%,-50%) scaleX(-1)}',
+    '.gpet-label{font-size:calc(var(--gpet-u) * 48);font-weight:700;letter-spacing:.03em;color:#2563eb}',
+    '.gpet-amount{font-size:calc(var(--gpet-u) * 88);font-weight:800;line-height:1.08;color:#0f172a;letter-spacing:-0.02em}',
+    '.gpet-period{font-size:calc(var(--gpet-u) * 76);font-weight:800;line-height:1.05}',
+    '.gpet-wrap{white-space:normal;max-width:calc(var(--gpet-u) * 450);line-height:1.32;font-size:calc(var(--gpet-u) * 42);margin:0 auto;word-break:break-word}',
+    '.gpet-hint{font-size:calc(var(--gpet-u) * 40);color:#64748b;letter-spacing:.02em;margin-top:calc(var(--gpet-u) * 8);min-height:calc(var(--gpet-u) * 48);line-height:1.15;font-weight:500}',
+    '.gpet-menu{position:fixed;min-width:210px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;background:rgba(255,255,255,0.96);backdrop-filter:blur(16px);border:1px solid rgba(37,99,235,0.25);border-radius:12px;padding:10px 12px;opacity:0;transform:scale(.92) translateY(-6px);transition:opacity .18s ease,transform .2s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:100000;box-shadow:0 12px 32px rgba(15,23,42,0.22);color-scheme:light;box-sizing:border-box}',
+    '.gpet-menu.gpet-menu-open{opacity:1;transform:scale(1) translateY(0);pointer-events:auto}',
+    '.gpet-menu-title{font-size:13px;font-weight:700;color:#1e3a8a;margin-bottom:8px;display:flex;align-items:center;gap:6px}',
+    '.gpet-menu-row{display:flex;align-items:center;gap:8px;margin:6px 0;color:#1e293b;font-size:12px;white-space:nowrap}',
+    '.gpet-range{flex:1;min-width:0;accent-color:#2563eb}',
+    '.gpet-number{width:46px;border:1px solid rgba(37,99,235,0.3);border-radius:6px;padding:2px 4px;font-size:12px;color:#1e293b;background:#fff;box-sizing:border-box;text-align:center}',
+    '.gpet-number:disabled{opacity:.4;background:rgba(0,0,0,0.06);cursor:not-allowed}',
+    '.gpet-sound{flex:1;border:1px solid rgba(37,99,235,0.3);border-radius:6px;background:rgba(37,99,235,0.06);color:#1e3a8a;font-size:12px;padding:4px 6px;cursor:pointer;font-weight:500}',
+    '.gpet-sound:hover{background:rgba(37,99,235,0.12)}',
+    '.gpet-check{width:16px;height:16px;accent-color:#2563eb;cursor:pointer;flex:0 0 auto}',
+    '.gpet-menu-sep{height:1px;background:rgba(37,99,235,0.15);margin:8px 0}',
+    '.gpet-volpct{width:38px;text-align:right;color:#64748b;font-size:11px}'
   ].join('\n');
 
   function initWidget() {
@@ -103,35 +103,35 @@
     (document.head || document.body).appendChild(styleEl);
 
     var root = document.createElement('div');
-    root.className = 'dshwv-root';
+    root.className = 'gpet-root';
 
     var body = document.createElement('div');
-    body.className = 'dshwv-body';
+    body.className = 'gpet-body';
 
     var img = document.createElement('img');
-    img.className = 'dshwv-img dshwv-breathe';
+    img.className = 'gpet-img gpet-breathe';
     img.src = IMAGES.chill;
     img.alt = 'Gemini 哈基米';
     img.draggable = false;
 
     var bubbleBox = document.createElement('div');
-    bubbleBox.className = 'dshwv-bubble';
+    bubbleBox.className = 'gpet-bubble';
     bubbleBox.innerHTML = '<svg viewBox="0 0 1026 700" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">' +
-      '<path class="dshwv-bshape" fill="#FFFFFF" stroke="#243b7a" stroke-width="18" stroke-linejoin="round" stroke-linecap="round" d="M 827 248 A 373 232 0 1 0 81 246 A 373 232 0 0 0 301 465 A 57 32 10 0 0 413 484 A 373 232 0 0 0 827 248 Z"/>' +
-      '<ellipse class="dshwv-b1" cx="352" cy="561" rx="37.5" ry="26" fill="#FFFFFF" stroke="#243b7a" stroke-width="18"/>' +
-      '<ellipse class="dshwv-b2" cx="442" cy="646" rx="24.5" ry="18" fill="#FFFFFF" stroke="#243b7a" stroke-width="18"/>' +
+      '<path class="gpet-bshape" fill="#FFFFFF" stroke="#2563eb" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" d="M 830,240 C 830,105 675,35 455,35 C 235,35 80,105 80,240 C 80,375 235,445 455,445 C 510,445 565,438 615,424 C 680,455 745,475 775,482 C 770,455 766,432 764,408 C 805,362 830,305 830,240 Z"/>' +
+      '<circle class="gpet-b1" cx="370" cy="565" r="26" fill="#FFFFFF" stroke="#2563eb" stroke-width="16"/>' +
+      '<circle class="gpet-b2" cx="445" cy="638" r="17" fill="#FFFFFF" stroke="#2563eb" stroke-width="16"/>' +
       '</svg>';
 
     var textBox = document.createElement('div');
-    textBox.className = 'dshwv-text';
+    textBox.className = 'gpet-text';
     var labelEl = document.createElement('div');
-    labelEl.className = 'dshwv-label';
+    labelEl.className = 'gpet-label';
     labelEl.textContent = '✦ Gemini 5小时配额';
     var amountEl = document.createElement('div');
-    amountEl.className = 'dshwv-amount';
+    amountEl.className = 'gpet-amount';
     amountEl.textContent = '100%';
     var hintEl = document.createElement('div');
-    hintEl.className = 'dshwv-hint';
+    hintEl.className = 'gpet-hint';
     hintEl.textContent = '反重力全速运转中 ✦';
     textBox.appendChild(labelEl);
     textBox.appendChild(amountEl);
@@ -164,7 +164,7 @@
 
     // Settings Menu Box
     var menuBox = document.createElement('div');
-    menuBox.className = 'dshwv-menu';
+    menuBox.className = 'gpet-menu';
 
     function menuLabel(text) {
       var s = document.createElement('span');
@@ -173,12 +173,12 @@
     }
     function menuRow() {
       var r = document.createElement('div');
-      r.className = 'dshwv-menu-row';
+      r.className = 'gpet-menu-row';
       return r;
     }
 
     var titleRow = document.createElement('div');
-    titleRow.className = 'dshwv-menu-title';
+    titleRow.className = 'gpet-menu-title';
     titleRow.innerHTML = '<span>✦</span><span style="flex:1">Gemini 哈基米设置</span>';
     var closeMenuBtn = document.createElement('button');
     closeMenuBtn.type = 'button';
@@ -194,7 +194,7 @@
     scaleInput.min = String(MIN_SCALE);
     scaleInput.max = String(MAX_SCALE);
     scaleInput.step = '0.1';
-    scaleInput.className = 'dshwv-range';
+    scaleInput.className = 'gpet-range';
     scaleInput.value = '1.2';
 
     var scaleNumber = document.createElement('input');
@@ -202,7 +202,7 @@
     scaleNumber.min = '1';
     scaleNumber.max = '20';
     scaleNumber.step = '1';
-    scaleNumber.className = 'dshwv-number';
+    scaleNumber.className = 'gpet-number';
     scaleNumber.value = '7';
 
     scaleInput.addEventListener('pointerdown', function () { root.style.transition = 'none'; });
@@ -215,7 +215,7 @@
     });
 
     var soundSelect = document.createElement('select');
-    soundSelect.className = 'dshwv-sound';
+    soundSelect.className = 'gpet-sound';
     function soundOpt(val, lbl) {
       var o = document.createElement('option');
       o.value = val;
@@ -231,24 +231,24 @@
     volInput.min = '0';
     volInput.max = '1';
     volInput.step = '0.05';
-    volInput.className = 'dshwv-range';
+    volInput.className = 'gpet-range';
     volInput.value = '0.9';
 
     var volPct = document.createElement('span');
-    volPct.className = 'dshwv-volpct';
+    volPct.className = 'gpet-volpct';
     volPct.textContent = '90%';
     volInput.addEventListener('input', function () { setVol(volInput.value); });
 
     // Quota View Select
     var quotaViewSelect = document.createElement('select');
-    quotaViewSelect.className = 'dshwv-sound';
+    quotaViewSelect.className = 'gpet-sound';
     quotaViewSelect.appendChild(soundOpt('5h', '5小时额度 (常用)'));
     quotaViewSelect.appendChild(soundOpt('weekly', '每周总额度'));
     quotaViewSelect.appendChild(soundOpt('alternate', '双额度交替轮播'));
     quotaViewSelect.addEventListener('change', function () { setQuotaView(quotaViewSelect.value); });
 
     var workStateSelect = document.createElement('select');
-    workStateSelect.className = 'dshwv-sound';
+    workStateSelect.className = 'gpet-sound';
     workStateSelect.appendChild(soundOpt('auto', '自动跟随 (工作吹茶/空闲站立)'));
     workStateSelect.appendChild(soundOpt('typing', '疯狂码字 (打字敲键盘)'));
     workStateSelect.appendChild(soundOpt('chill', '吹茶品茗 (工作中)'));
@@ -261,25 +261,25 @@
 
     var bubbleToggle = document.createElement('input');
     bubbleToggle.type = 'checkbox';
-    bubbleToggle.className = 'dshwv-check';
+    bubbleToggle.className = 'gpet-check';
     bubbleToggle.checked = true;
     bubbleToggle.addEventListener('change', function () { setBubbleOn(bubbleToggle.checked); });
 
     var typingToggle = document.createElement('input');
     typingToggle.type = 'checkbox';
-    typingToggle.className = 'dshwv-check';
+    typingToggle.className = 'gpet-check';
     typingToggle.checked = true;
     typingToggle.addEventListener('change', function () { setTypingOn(typingToggle.checked); });
 
     var gravityToggle = document.createElement('input');
     gravityToggle.type = 'checkbox';
-    gravityToggle.className = 'dshwv-check';
+    gravityToggle.className = 'gpet-check';
     gravityToggle.checked = true;
     gravityToggle.addEventListener('change', function () { setGravityOn(gravityToggle.checked); });
 
     var turnCostToggle = document.createElement('input');
     turnCostToggle.type = 'checkbox';
-    turnCostToggle.className = 'dshwv-check';
+    turnCostToggle.className = 'gpet-check';
     turnCostToggle.checked = true;
     turnCostToggle.addEventListener('change', function () { setTurnCostOn(turnCostToggle.checked); });
 
@@ -287,7 +287,7 @@
     turnCostCloseInput.type = 'number';
     turnCostCloseInput.min = '0';
     turnCostCloseInput.step = '1';
-    turnCostCloseInput.className = 'dshwv-number';
+    turnCostCloseInput.className = 'gpet-number';
     turnCostCloseInput.value = '5';
     turnCostCloseInput.title = '填 0 表示不自动关闭';
     turnCostCloseInput.addEventListener('input', function () { setTurnCostClose(turnCostCloseInput.value); });
@@ -300,10 +300,10 @@
     var row5 = menuRow(); row5.appendChild(menuLabel('气泡')); row5.appendChild(bubbleToggle);
     var rowTyping = menuRow(); rowTyping.appendChild(menuLabel('打字工友')); rowTyping.appendChild(typingToggle);
     var rowGrav = menuRow(); rowGrav.appendChild(menuLabel('重力下落')); rowGrav.appendChild(gravityToggle);
-    var sep1 = document.createElement('div'); sep1.className = 'dshwv-menu-sep';
+    var sep1 = document.createElement('div'); sep1.className = 'gpet-menu-sep';
     var row6 = menuRow(); row6.appendChild(menuLabel('对话消耗')); row6.appendChild(turnCostToggle); row6.appendChild(menuLabel('自动关闭')); row6.appendChild(turnCostCloseInput); row6.appendChild(menuLabel('秒'));
 
-    var sep2 = document.createElement('div'); sep2.className = 'dshwv-menu-sep';
+    var sep2 = document.createElement('div'); sep2.className = 'gpet-menu-sep';
     var row7 = menuRow();
     row7.style.cssText = 'margin-top:10px;display:flex;width:100%;';
     var quitBtn = document.createElement('button');
@@ -337,7 +337,7 @@
     menuBox.appendChild(row7);
 
     var comboBadge = document.createElement('div');
-    comboBadge.className = 'dshwv-combo-badge';
+    comboBadge.className = 'gpet-combo-badge';
     comboBadge.textContent = 'Combo x1';
 
     body.appendChild(img);
@@ -395,7 +395,7 @@
     var turnCostOn = true;
     var turnCostCloseMs = 5000;
 
-    var BUBBLE_STYLE_CLASS = { A: 'dshwv-label', B: 'dshwv-amount', P: 'dshwv-period', C: 'dshwv-hint' };
+    var BUBBLE_STYLE_CLASS = { A: 'gpet-label', B: 'gpet-amount', P: 'gpet-period', C: 'gpet-hint' };
 
     function pickOne(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
     function singleCenter(style, text, color, wrap) { return [null, { t: text, s: style, c: color || '', w: !!wrap }, null]; }
@@ -463,11 +463,11 @@
         if (ln) {
           el.style.display = '';
           if (typeof ln === 'string') {
-            el.className = 'dshwv-label dshwv-wrap';
+            el.className = 'gpet-label gpet-wrap';
             el.textContent = ln;
             el.style.color = '#1e3a8a';
           } else {
-            el.className = (BUBBLE_STYLE_CLASS[ln.s] || 'dshwv-label') + (ln.w ? ' dshwv-wrap' : '');
+            el.className = (BUBBLE_STYLE_CLASS[ln.s] || 'gpet-label') + (ln.w ? ' gpet-wrap' : '');
             el.textContent = ln.t !== undefined ? ln.t : '';
             el.style.color = ln.c || '';
           }
@@ -519,12 +519,12 @@
       if (hintFadeTimer) { clearTimeout(hintFadeTimer); hintFadeTimer = null; }
       lastHintText = null;
       labelEl.style.display = '';
-      labelEl.className = 'dshwv-label';
+      labelEl.className = 'gpet-label';
       labelEl.style.color = '#2563eb';
       amountEl.style.display = '';
-      amountEl.className = 'dshwv-amount';
+      amountEl.className = 'gpet-amount';
       hintEl.style.display = '';
-      hintEl.className = 'dshwv-hint';
+      hintEl.className = 'gpet-hint';
       hintEl.style.color = '';
       if (state.quotaView === 'alternate') {
         state.alternateFlip = !state.alternateFlip;
@@ -548,7 +548,7 @@
         } else {
           restoreBubbleLines(false);
           bubbleShown = true;
-          bubbleBox.classList.add('dshwv-bubble-open');
+          bubbleBox.classList.add('gpet-bubble-open');
         }
       } else {
         // 其他文字类：全部随着按压次数随机显示
@@ -561,7 +561,7 @@
         } else {
           applyBubbleLines(lines);
           bubbleShown = true;
-          bubbleBox.classList.add('dshwv-bubble-open');
+          bubbleBox.classList.add('gpet-bubble-open');
         }
       }
 
@@ -596,7 +596,7 @@
       } else {
         applyBubbleLines(lines);
         bubbleShown = true;
-        bubbleBox.classList.add('dshwv-bubble-open');
+        bubbleBox.classList.add('gpet-bubble-open');
       }
 
       bubbleTimer = setTimeout(hideBubble, 4500);
@@ -606,7 +606,7 @@
     function spawnHeartNearHead() {
       try {
         var heart = document.createElement('div');
-        heart.className = 'dshwv-heart';
+        heart.className = 'gpet-heart';
         heart.textContent = pickOne(heartSymbols);
         var rX = 58 + Math.random() * 26;
         var rY = 38 + Math.random() * 16;
@@ -643,7 +643,7 @@
       } else {
         applyBubbleLines(lines);
         bubbleShown = true;
-        bubbleBox.classList.add('dshwv-bubble-open');
+        bubbleBox.classList.add('gpet-bubble-open');
       }
 
       bubbleTimer = setTimeout(hideBubble, 4500);
@@ -662,7 +662,7 @@
       } else {
         applyBubbleLines(lines);
         bubbleShown = true;
-        bubbleBox.classList.add('dshwv-bubble-open');
+        bubbleBox.classList.add('gpet-bubble-open');
       }
       bubbleTimer = setTimeout(hideBubble, 5000);
     }
@@ -682,7 +682,7 @@
       bubbleRandomLines = null;
       bubbleShown = false;
       pressCount = 0;
-      bubbleBox.classList.remove('dshwv-bubble-open');
+      bubbleBox.classList.remove('gpet-bubble-open');
       updateMousePassThrough(false);
     }
 
@@ -707,9 +707,9 @@
       bubbleShown = true;
       pressCount = 0;
       labelEl.style.display = '';
-      labelEl.className = 'dshwv-label';
+      labelEl.className = 'gpet-label';
       amountEl.style.display = '';
-      amountEl.className = 'dshwv-amount';
+      amountEl.className = 'gpet-amount';
       hintEl.style.display = 'none';
       hintEl.textContent = '';
 
@@ -718,8 +718,8 @@
         labelEl.style.color = '#7c3aed';
         amountEl.textContent = '持续工作中喵~ (ฅ^ω^ฅ)';
         amountEl.style.color = '#7c3aed';
-        amountEl.style.fontSize = 'calc(var(--dshw-u) * 50)';
-        bubbleBox.classList.add('dshwv-bubble-open');
+        amountEl.style.fontSize = 'calc(var(--gpet-u) * 50)';
+        bubbleBox.classList.add('gpet-bubble-open');
         // Keep open while agent is working
       } else {
         labelEl.textContent = '✦ 主人，本次一共消耗:';
@@ -731,7 +731,7 @@
           amountEl.textContent = String(amount || '--');
         }
         amountEl.style.color = '#e0433f';
-        bubbleBox.classList.add('dshwv-bubble-open');
+        bubbleBox.classList.add('gpet-bubble-open');
         if (turnCostCloseMs > 0) {
           costBubbleTimer = setTimeout(hideCostBubble, turnCostCloseMs);
         }
@@ -756,7 +756,7 @@
 
     function updateBaseUnits() {
       var w = Math.round(260 * state.scale);
-      root.style.setProperty('--dshw-base', w + 'px');
+      root.style.setProperty('--gpet-base', w + 'px');
     }
     window.addEventListener('resize', updateBaseUnits);
 
@@ -833,7 +833,7 @@
       root.style.bottom = 'auto';
       root.style.left = state.left + 'px';
       root.style.top = state.top + 'px';
-      root.classList.toggle('dshwv-left', state.h === 'left');
+      root.classList.toggle('gpet-left', state.h === 'left');
     }
 
     function settle() {
@@ -973,29 +973,29 @@
     // Spring animations & Q-elastic squish tactile reaction
     function pressDown() {
       pressing = true;
-      img.classList.remove('dshwv-breathe');
-      img.classList.remove('dshwv-jelly');
-      img.classList.add('dshwv-squished');
+      img.classList.remove('gpet-breathe');
+      img.classList.remove('gpet-jelly');
+      img.classList.add('gpet-squished');
       playPress();
     }
 
     function pressUp(dragMoved) {
       pressing = false;
-      img.classList.remove('dshwv-squished');
+      img.classList.remove('gpet-squished');
       if (!dragMoved) {
         // Trigger Q-elastic jelly spring bounce!
         void img.offsetWidth;
-        img.classList.add('dshwv-jelly');
+        img.classList.add('gpet-jelly');
         setTimeout(function () {
-          img.classList.remove('dshwv-jelly');
+          img.classList.remove('gpet-jelly');
           img.style.transform = '';
-          img.classList.add('dshwv-breathe');
+          img.classList.add('gpet-breathe');
         }, 550);
         playRelease();
       } else {
-        img.classList.remove('dshwv-jelly');
+        img.classList.remove('gpet-jelly');
         img.style.transform = '';
-        img.classList.add('dshwv-breathe');
+        img.classList.add('gpet-breathe');
       }
     }
 
@@ -1008,8 +1008,8 @@
 
       var pxW = Math.round(260 * next);
       var pxH = Math.round(360 * next);
-      root.style.setProperty('--dshw-scale', String(next));
-      root.style.setProperty('--dshw-base', pxW + 'px');
+      root.style.setProperty('--gpet-scale', String(next));
+      root.style.setProperty('--gpet-base', pxW + 'px');
 
       if (ipcRenderer) {
         ipcRenderer.send('pet-set-scale', next, state.h === 'left');
@@ -1132,12 +1132,12 @@
         hideBubble();
         positionMenu();
       }
-      menuBox.classList.toggle('dshwv-menu-open', menuOpen);
+      menuBox.classList.toggle('gpet-menu-open', menuOpen);
       updateMousePassThrough(menuOpen || bubbleShown);
     }
     function closeMenu() {
       menuOpen = false;
-      menuBox.classList.remove('dshwv-menu-open');
+      menuBox.classList.remove('gpet-menu-open');
       updateMousePassThrough(bubbleShown);
     }
 
@@ -1275,10 +1275,10 @@
       var minX = leftOff + 10;
       var maxX = Math.max(minX, leftOff + screenW - petW - 10);
 
-      img.classList.remove('dshwv-breathe');
-      img.classList.remove('dshwv-jelly');
-      img.classList.remove('dshwv-squished');
-      img.src = IMAGES.dragged;
+      img.classList.remove('gpet-breathe');
+      img.classList.remove('gpet-jelly');
+      img.classList.remove('gpet-squished');
+      img.src = IMAGES.happy;
 
       function tick() {
         vy += gravity;
@@ -1304,11 +1304,11 @@
           }
           if (Math.abs(vy) > 2.8) {
             playRelease();
-            img.classList.remove('dshwv-jelly');
+            img.classList.remove('gpet-jelly');
             void img.offsetWidth;
-            img.classList.add('dshwv-jelly');
+            img.classList.add('gpet-jelly');
             setTimeout(function () {
-              img.classList.remove('dshwv-jelly');
+              img.classList.remove('gpet-jelly');
             }, 550);
 
             vy = -vy * 0.34;
@@ -1353,7 +1353,7 @@
           happyTimer = setTimeout(function () {
             inHappyReaction = false;
             syncSprite();
-            img.classList.add('dshwv-breathe');
+            img.classList.add('gpet-breathe');
           }, 2400);
         }
       }
@@ -1371,7 +1371,7 @@
     function onDocPointerDown(e) {
       stopGravityDrop();
       if (e.target && e.target.closest) {
-        if (e.target.closest('.dshwv-bubble') || e.target.closest('.dshwv-menu')) return;
+        if (e.target.closest('.gpet-bubble') || e.target.closest('.gpet-menu')) return;
       }
       if (menuOpen) {
         closeMenu();
@@ -1469,9 +1469,9 @@
       if (screenDx * screenDx + screenDy * screenDy >= CLICK_SQ) {
         if (!drag.moved) {
           drag.moved = true;
-          root.classList.add('dshwv-dragging');
-          img.classList.remove('dshwv-squished');
-          img.classList.remove('dshwv-jelly');
+          root.classList.add('gpet-dragging');
+          img.classList.remove('gpet-squished');
+          img.classList.remove('gpet-jelly');
           img.style.transform = '';
           if (pressAudio) {
             try { pressAudio.pause(); pressAudio.currentTime = 0; } catch (_) {}
@@ -1532,7 +1532,7 @@
       document.removeEventListener('pointerup', onDocPointerUp, true);
       document.removeEventListener('pointercancel', onDocPointerCancel, true);
       window.removeEventListener('blur', onWindowBlurDuringDrag);
-      root.classList.remove('dshwv-dragging');
+      root.classList.remove('gpet-dragging');
       pressUp(dragMoved);
 
       if (clickAllowed && !dragMoved) {
@@ -1543,7 +1543,7 @@
         happyTimer = setTimeout(function () {
           inHappyReaction = false;
           syncSprite();
-          img.classList.add('dshwv-breathe');
+          img.classList.add('gpet-breathe');
         }, 1200);
         return;
       }
@@ -1588,7 +1588,7 @@
           var lines = singleCenter('A', pickOne(hoverQuotes), '#2563eb', true);
           applyBubbleLines(lines);
           bubbleShown = true;
-          bubbleBox.classList.add('dshwv-bubble-open');
+          bubbleBox.classList.add('gpet-bubble-open');
           bubbleTimer = setTimeout(hideBubble, 3200);
         }
       }
@@ -1616,7 +1616,7 @@
         happyTimer = setTimeout(function () {
           inHappyReaction = false;
           syncSprite();
-          img.classList.add('dshwv-breathe');
+          img.classList.add('gpet-breathe');
         }, 2200);
         return;
       }
@@ -1627,7 +1627,7 @@
       happyTimer = setTimeout(function () {
         inHappyReaction = false;
         syncSprite();
-        img.classList.add('dshwv-breathe');
+        img.classList.add('gpet-breathe');
       }, 2200);
     }
 
@@ -1711,7 +1711,7 @@
     }, { passive: false });
 
     function onDocClickStopper(e) {
-      if (e.target && e.target.closest && (e.target.closest('.dshwv-menu') || e.target.closest('.dshwv-bubble'))) return;
+      if (e.target && e.target.closest && (e.target.closest('.gpet-menu') || e.target.closest('.gpet-bubble'))) return;
       if (!isCharacterHit(e)) return;
       try { e.preventDefault(); e.stopPropagation(); } catch (_) {}
     }
@@ -1762,7 +1762,7 @@
       if (!bubbleShown) return false;
       try {
         var el = document.elementFromPoint(e.clientX, e.clientY);
-        if (el && el.closest && el.closest('.dshwv-bubble-open')) {
+        if (el && el.closest && el.closest('.gpet-bubble-open')) {
           return true;
         }
       } catch (_) {}
@@ -1781,7 +1781,7 @@
       var overMenu = menuOpen && (function () {
         try {
           var el = document.elementFromPoint(e.clientX, e.clientY);
-          return !!(el && el.closest && el.closest('.dshwv-menu-open'));
+          return !!(el && el.closest && el.closest('.gpet-menu-open'));
         } catch (_) { return false; }
       })();
       var shouldCapture = over || overBubble || overMenu;
@@ -1816,7 +1816,7 @@
     function spawnTypingSpark() {
       try {
         var spark = document.createElement('div');
-        spark.className = 'dshwv-heart';
+        spark.className = 'gpet-heart';
         var isFire = typingCombo >= 15;
         spark.textContent = isFire ? (Math.random() > 0.5 ? '🔥' : '⚡') : (Math.random() > 0.5 ? '✦' : '💻');
         var r = img.getBoundingClientRect();
@@ -1851,7 +1851,7 @@
       } else {
         applyBubbleLines(lines);
         bubbleShown = true;
-        bubbleBox.classList.add('dshwv-bubble-open');
+        bubbleBox.classList.add('gpet-bubble-open');
       }
 
       bubbleTimer = setTimeout(hideBubble, 3800);
@@ -1862,14 +1862,14 @@
 
       typingCombo++;
       comboBadge.textContent = 'Combo x' + typingCombo;
-      comboBadge.classList.add('dshwv-combo-active');
-      comboBadge.classList.toggle('dshwv-combo-fever', typingCombo >= 15);
+      comboBadge.classList.add('gpet-combo-active');
+      comboBadge.classList.toggle('gpet-combo-fever', typingCombo >= 15);
 
       if (!inTypingMode && workStateMode !== 'typing') {
         inTypingMode = true;
         syncSprite();
-        img.classList.remove('dshwv-breathe');
-        img.classList.add('dshwv-typing-anim');
+        img.classList.remove('gpet-breathe');
+        img.classList.add('gpet-typing-anim');
       }
 
       if (typingCombo % 4 === 0 || typingCombo >= 15) {
@@ -1888,11 +1888,11 @@
       if (!inTypingMode) return;
       inTypingMode = false;
       typingCombo = 0;
-      comboBadge.classList.remove('dshwv-combo-active');
-      comboBadge.classList.remove('dshwv-combo-fever');
-      img.classList.remove('dshwv-typing-anim');
+      comboBadge.classList.remove('gpet-combo-active');
+      comboBadge.classList.remove('gpet-combo-fever');
+      img.classList.remove('gpet-typing-anim');
       syncSprite();
-      img.classList.add('dshwv-breathe');
+      img.classList.add('gpet-breathe');
     }
 
     document.addEventListener('keydown', function () {
@@ -1931,9 +1931,9 @@
       });
       ipcRenderer.on('pet-call-attention', function () {
         try {
-          img.classList.remove('dshwv-jelly');
+          img.classList.remove('gpet-jelly');
           void img.offsetWidth;
-          img.classList.add('dshwv-jelly');
+          img.classList.add('gpet-jelly');
           playRelease();
           showCustomSpeechBubble('✦ 主人，我在这里喵！(ฅ^ω^ฅ)', '#2563eb');
         } catch (_) {}

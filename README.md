@@ -1,4 +1,4 @@
-﻿# ✦ Gemini 哈基米桌宠 (Gemini Desktop Pet)
+# ✦ Gemini 哈基米桌宠 (Gemini Desktop Pet)
 
 > **专为 Google Gemini 与 Antigravity 打造的超轻量、纯净透明桌面看板娘 & 伴侣**  
 > 100% 独立绿色运行 · 零侵入代码检测 · 真实配额同步 · 键盘连击伴舞 · 极致解压果冻触感
@@ -110,6 +110,13 @@ gemini-pet/
 ├── LICENSE             # MIT 开源许可证
 └── README.md           # 本说明文档
 ```
+
+---
+
+## 🙏 灵感致谢 (Acknowledgements)
+
+本项目在创意雏形与交互理念上，特别致谢开源社区中所有创作、探索“DeepSeek 大肥鱼”形象与桌面萌宠玩法的开发者与创作者们！  
+正是开源社区源源不断的灵感火花与陪伴理念，启发了我们为 Google Gemini & Antigravity 打造专属于开发者的桌面伴侣。❤️
 
 ---
 
