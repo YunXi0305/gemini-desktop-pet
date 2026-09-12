@@ -222,47 +222,46 @@
     scaleNumber.className = 'gpet-number';
     scaleNumber.value = '7';
 
-    scaleInput.addEventListener('pointerdown', function () {
-      root.style.transition = 'none';
-      if (ipcRenderer) ipcRenderer.send('pet-scale-start', state.h === 'left');
+    scaleInput.addEventListener('input', function () {
+      var raw = Number(scaleInput.value);
+      var clamped = Math.round(Math.min(MAX_SCALE, Math.max(MIN_SCALE, raw)) * 10) / 10;
+      var lvl = Math.round((clamped - 0.6) * 10) + 1;
+      scaleNumber.value = String(Math.max(1, Math.min(20, lvl)));
     });
-    scaleInput.addEventListener('input', function () { setScale(scaleInput.value, false, false); });
     scaleInput.addEventListener('pointerup', function () {
-      root.style.transition = '';
-      if (ipcRenderer) ipcRenderer.send('pet-scale-end', state.scale, state.h === 'left');
+      setScale(scaleInput.value, false, false);
       saveConfig(true);
     });
     scaleInput.addEventListener('change', function () {
-      root.style.transition = '';
-      if (ipcRenderer) ipcRenderer.send('pet-scale-end', state.scale, state.h === 'left');
+      setScale(scaleInput.value, false, false);
       saveConfig(true);
     });
 
-    scaleNumber.addEventListener('pointerdown', function () {
-      root.style.transition = 'none';
-      if (ipcRenderer) ipcRenderer.send('pet-scale-start', state.h === 'left');
-    });
-    scaleNumber.addEventListener('keydown', function () {
-      if (ipcRenderer) ipcRenderer.send('pet-scale-start', state.h === 'left');
-    });
-    scaleNumber.addEventListener('input', function () {
+    var scaleNumberMiniDebounce = null;
+    function commitMiniNumber() {
+      if (scaleNumberMiniDebounce) {
+        clearTimeout(scaleNumberMiniDebounce);
+        scaleNumberMiniDebounce = null;
+      }
       var v = Math.max(1, Math.min(20, Math.round(Number(scaleNumber.value) || 7)));
       var s = (v - 1) * 0.1 + 0.6;
       setScale(s, false, true);
-    });
-    scaleNumber.addEventListener('pointerup', function () {
-      root.style.transition = '';
-      if (ipcRenderer) ipcRenderer.send('pet-scale-end', state.scale, state.h === 'left');
       saveConfig(true);
+    }
+
+    scaleNumber.addEventListener('input', function () {
+      var v = Math.max(1, Math.min(20, Math.round(Number(scaleNumber.value) || 7)));
+      var s = Math.round(((v - 1) * 0.1 + 0.6) * 10) / 10;
+      scaleInput.value = String(s);
+
+      if (scaleNumberMiniDebounce) clearTimeout(scaleNumberMiniDebounce);
+      scaleNumberMiniDebounce = setTimeout(commitMiniNumber, 200);
     });
     scaleNumber.addEventListener('change', function () {
-      root.style.transition = '';
-      if (ipcRenderer) ipcRenderer.send('pet-scale-end', state.scale, state.h === 'left');
-      saveConfig(true);
+      commitMiniNumber();
     });
     scaleNumber.addEventListener('blur', function () {
-      if (ipcRenderer) ipcRenderer.send('pet-scale-end', state.scale, state.h === 'left');
-      saveConfig(true);
+      commitMiniNumber();
     });
 
     var soundSelect = document.createElement('select');
@@ -287,8 +286,17 @@
 
     var volPct = document.createElement('span');
     volPct.className = 'gpet-volpct';
-    volInput.addEventListener('input', function () { setVol(volInput.value, false); });
-    volInput.addEventListener('change', function () { saveConfig(true); });
+    volInput.addEventListener('input', function () {
+      if (volPct) volPct.textContent = Math.round(volInput.value * 100) + '%';
+    });
+    volInput.addEventListener('pointerup', function () {
+      setVol(volInput.value, false);
+      saveConfig(true);
+    });
+    volInput.addEventListener('change', function () {
+      setVol(volInput.value, false);
+      saveConfig(true);
+    });
 
     // Quota View Select
     var quotaViewSelect = document.createElement('select');

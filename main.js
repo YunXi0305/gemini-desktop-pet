@@ -691,8 +691,8 @@ function registerIpc() {
       const { s: targetS, isLeft: targetIsLeft } = targetScaleReq;
       const baseW = 290;
       const baseH = 390;
-      const newW = Math.max(260, Math.round(baseW * targetS));
-      const newH = Math.max(340, Math.round(baseH * targetS));
+      const newW = Math.max(160, Math.round(baseW * targetS));
+      const newH = Math.max(220, Math.round(baseH * targetS));
 
       const b = getSafePetBounds();
       const disp = screen.getDisplayMatching(b);
@@ -750,17 +750,15 @@ function registerIpc() {
       const s = Math.max(0.6, Math.min(2.5, Number(scale) || 1.2));
       targetScaleReq = { s, isLeft: isLeft !== undefined ? !!isLeft : undefined };
 
-      // Instantly scale CSS inside petWin (60fps GPU speed)
       try {
         petWin.webContents.send('pet-apply-scale', s);
       } catch (_) {}
 
-      // Debounce window trim to 220ms after dragging pauses
-      if (scaleResizeTimer) clearTimeout(scaleResizeTimer);
-      scaleResizeTimer = setTimeout(() => {
+      if (scaleResizeTimer) {
+        clearTimeout(scaleResizeTimer);
         scaleResizeTimer = null;
-        applyFinalScaleBounds();
-      }, 220);
+      }
+      applyFinalScaleBounds();
     } catch (_) {}
   });
 
