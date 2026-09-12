@@ -105,13 +105,17 @@ function savePosition(x, y, immediate = false) {
   } catch (_) {}
 }
 
-function getAntigravityPid() {
+let cachedAntigravityPid = 0;
+
+function refreshAntigravityPidAsync() {
   try {
-    const out = child_process.execSync('tasklist /FI "IMAGENAME eq Antigravity.exe" /FO CSV /NH', { encoding: 'utf8' });
-    const match = out.match(/"Antigravity\.exe","(\d+)"/i);
-    if (match) return Number(match[1]);
+    child_process.exec('tasklist /FI "IMAGENAME eq Antigravity.exe" /FO CSV /NH', (err, stdout) => {
+      if (stdout) {
+        const match = stdout.match(/"Antigravity\.exe","(\d+)"/i);
+        if (match) cachedAntigravityPid = Number(match[1]);
+      }
+    });
   } catch (_) {}
-  return 0;
 }
 
 function getWatcherExePath() {
@@ -873,9 +877,13 @@ function registerIpc() {
     logMsg('pet-quit received from IPC!');
     userExplicitlyClosed = true;
     try {
-      const agPid = getAntigravityPid();
+      if (settingsWin && !settingsWin.isDestroyed()) settingsWin.destroy();
+      if (petWin && !petWin.isDestroyed()) petWin.destroy();
+      if (tray && !tray.isDestroyed()) tray.destroy();
+    } catch (_) {}
+    try {
       const sessionFile = path.join(userDataDir, 'session_state.json');
-      fs.writeFileSync(sessionFile, JSON.stringify({ suppressedPid: agPid }), 'utf8');
+      fs.writeFileSync(sessionFile, JSON.stringify({ suppressedPid: cachedAntigravityPid }), 'utf8');
     } catch (_) {}
     cleanExit('pet-quit-ipc');
   });
@@ -884,6 +892,15 @@ function registerIpc() {
 function cleanExit(reason) {
   logMsg('cleanExit called! reason=' + reason);
   try {
+    if (settingsWin && !settingsWin.isDestroyed()) settingsWin.destroy();
+    if (petWin && !petWin.isDestroyed()) petWin.destroy();
+    if (tray && !tray.isDestroyed()) tray.destroy();
+
+    stopKeyWatcher();
+    if (quotaInterval) clearInterval(quotaInterval);
+    if (agentWorkInterval) clearTimeout(agentWorkInterval);
+    if (antigravityProbeInterval) clearTimeout(antigravityProbeInterval);
+
     if (saveConfigTimer) {
       clearTimeout(saveConfigTimer);
       saveConfigTimer = null;
@@ -898,18 +915,13 @@ function cleanExit(reason) {
         try { fs.writeFileSync(posFile, JSON.stringify(pendingPos), 'utf8'); } catch (_) {}
       }
     }
-    stopKeyWatcher();
-    if (quotaInterval) clearInterval(quotaInterval);
-    if (agentWorkInterval) clearTimeout(agentWorkInterval);
-    if (antigravityProbeInterval) clearTimeout(antigravityProbeInterval);
-    if (settingsWin && !settingsWin.isDestroyed()) settingsWin.destroy();
-    if (petWin && !petWin.isDestroyed()) petWin.destroy();
-    if (tray && !tray.isDestroyed()) tray.destroy();
   } catch (err) {
     logMsg('cleanExit cleanup error: ' + err);
   }
   app.quit();
-  process.exit(0);
+  setTimeout(() => {
+    process.exit(0);
+  }, 1500).unref();
 }
 
 // 8. Desktop Pet Window Creation
@@ -1007,6 +1019,9 @@ function createDesktopPetWindow() {
       if (!petWin || petWin.isDestroyed()) return;
       const prev = isAntigravityAlive;
       const curr = await checkAntigravityAlive();
+      if (curr) {
+        refreshAntigravityPidAsync();
+      }
       if (curr !== prev && petWin && !petWin.isDestroyed()) {
         petWin.webContents.send('pet-antigravity-state', curr);
         if (curr) {
