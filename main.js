@@ -685,46 +685,95 @@ function registerIpc() {
     } catch (_) {}
   });
 
+  function applyFinalScaleBounds() {
+    try {
+      if (!targetScaleReq || !petWin || petWin.isDestroyed()) return;
+      const { s: targetS, isLeft: targetIsLeft } = targetScaleReq;
+      const baseW = 290;
+      const baseH = 390;
+      const newW = Math.max(260, Math.round(baseW * targetS));
+      const newH = Math.max(340, Math.round(baseH * targetS));
+
+      const b = getSafePetBounds();
+      const disp = screen.getDisplayMatching(b);
+      const isLeft = targetIsLeft !== undefined
+        ? targetIsLeft
+        : (b.x < (disp.workArea.x + disp.workArea.width / 2));
+
+      const anchorRight = b.x + b.width;
+      const anchorBottom = b.y + b.height;
+
+      const newX = isLeft ? b.x : (anchorRight - newW);
+      const newY = anchorBottom - newH;
+
+      if (b.x === Math.round(newX) && b.y === Math.round(newY) && b.width === newW && b.height === newH) {
+        return;
+      }
+
+      b.x = Math.round(newX);
+      b.y = Math.round(newY);
+      b.width = newW;
+      b.height = newH;
+
+      petWin.setBounds(b);
+      savePosition(b.x, b.y);
+    } catch (_) {}
+  }
+
+  ipcMain.on('pet-scale-start', (event, isLeft) => {
+    try {
+      if (!petWin || petWin.isDestroyed()) return;
+      const b = getSafePetBounds();
+      const disp = screen.getDisplayMatching(b);
+      const leftMode = isLeft !== undefined
+        ? !!isLeft
+        : (b.x < (disp.workArea.x + disp.workArea.width / 2));
+      const maxW = 750;
+      const maxH = 980;
+      if (b.width < maxW || b.height < maxH) {
+        const anchorRight = b.x + b.width;
+        const anchorBottom = b.y + b.height;
+        const newX = leftMode ? b.x : (anchorRight - maxW);
+        const newY = anchorBottom - maxH;
+        b.x = Math.round(newX);
+        b.y = Math.round(newY);
+        b.width = maxW;
+        b.height = maxH;
+        petWin.setBounds(b);
+      }
+    } catch (_) {}
+  });
+
   ipcMain.on('pet-set-scale', (event, scale, isLeft) => {
     try {
       if (!petWin || petWin.isDestroyed()) return;
       const s = Math.max(0.6, Math.min(2.5, Number(scale) || 1.2));
-      targetScaleReq = { s, isLeft: !!isLeft };
+      targetScaleReq = { s, isLeft: isLeft !== undefined ? !!isLeft : undefined };
 
+      // Instantly scale CSS inside petWin (60fps GPU speed)
       try {
         petWin.webContents.send('pet-apply-scale', s);
       } catch (_) {}
 
-      if (!scaleResizeTimer) {
-        scaleResizeTimer = setTimeout(() => {
-          scaleResizeTimer = null;
-          if (!targetScaleReq || !petWin || petWin.isDestroyed()) return;
-          const { s: targetS, isLeft: targetIsLeft } = targetScaleReq;
-          const baseW = 290;
-          const baseH = 390;
-          const newW = Math.max(260, Math.round(baseW * targetS));
-          const newH = Math.max(340, Math.round(baseH * targetS));
+      // Debounce window trim to 220ms after dragging pauses
+      if (scaleResizeTimer) clearTimeout(scaleResizeTimer);
+      scaleResizeTimer = setTimeout(() => {
+        scaleResizeTimer = null;
+        applyFinalScaleBounds();
+      }, 220);
+    } catch (_) {}
+  });
 
-          const b = getSafePetBounds();
-          const anchorRight = b.x + b.width;
-          const anchorBottom = b.y + b.height;
-
-          const newX = targetIsLeft ? b.x : (anchorRight - newW);
-          const newY = anchorBottom - newH;
-
-          if (b.x === Math.round(newX) && b.y === Math.round(newY) && b.width === newW && b.height === newH) {
-            return;
-          }
-
-          b.x = Math.round(newX);
-          b.y = Math.round(newY);
-          b.width = newW;
-          b.height = newH;
-
-          petWin.setBounds(b);
-          savePosition(b.x, b.y);
-        }, 50);
+  ipcMain.on('pet-scale-end', (event, scale, isLeft) => {
+    try {
+      if (scale !== undefined) {
+        targetScaleReq = { s: Math.max(0.6, Math.min(2.5, Number(scale) || 1.2)), isLeft: isLeft !== undefined ? !!isLeft : undefined };
       }
+      if (scaleResizeTimer) {
+        clearTimeout(scaleResizeTimer);
+        scaleResizeTimer = null;
+      }
+      applyFinalScaleBounds();
     } catch (_) {}
   });
 

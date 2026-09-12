@@ -37,6 +37,7 @@
   var css = [
     '.gpet-root{position:fixed;right:20px;bottom:20px;--gpet-scale:1.2;--gpet-base:calc(260px * var(--gpet-scale));width:var(--gpet-base);height:calc(var(--gpet-base) * 1.385);pointer-events:none;user-select:none;-webkit-user-select:none;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;transition:left .16s ease,top .16s ease,transform .3s ease}',
     '.gpet-root.gpet-left{transform:scaleX(-1)}',
+    '.gpet-root.gpet-scaling, .gpet-root.gpet-scaling *{transition:none !important}',
     '.gpet-root.gpet-dragging{cursor:grabbing;transition:none !important}',
     '.gpet-root.gpet-dragging .gpet-body{transition:none !important;transform:none !important}',
     '.gpet-body{position:absolute;left:0;top:0;width:100%;height:100%}',
@@ -221,21 +222,46 @@
     scaleNumber.className = 'gpet-number';
     scaleNumber.value = '7';
 
-    scaleInput.addEventListener('pointerdown', function () { root.style.transition = 'none'; });
+    scaleInput.addEventListener('pointerdown', function () {
+      root.style.transition = 'none';
+      if (ipcRenderer) ipcRenderer.send('pet-scale-start', state.h === 'left');
+    });
     scaleInput.addEventListener('input', function () { setScale(scaleInput.value, false, false); });
+    scaleInput.addEventListener('pointerup', function () {
+      root.style.transition = '';
+      if (ipcRenderer) ipcRenderer.send('pet-scale-end', state.scale, state.h === 'left');
+      saveConfig(true);
+    });
     scaleInput.addEventListener('change', function () {
       root.style.transition = '';
+      if (ipcRenderer) ipcRenderer.send('pet-scale-end', state.scale, state.h === 'left');
       saveConfig(true);
     });
 
-    scaleNumber.addEventListener('pointerdown', function () { root.style.transition = 'none'; });
+    scaleNumber.addEventListener('pointerdown', function () {
+      root.style.transition = 'none';
+      if (ipcRenderer) ipcRenderer.send('pet-scale-start', state.h === 'left');
+    });
+    scaleNumber.addEventListener('keydown', function () {
+      if (ipcRenderer) ipcRenderer.send('pet-scale-start', state.h === 'left');
+    });
     scaleNumber.addEventListener('input', function () {
       var v = Math.max(1, Math.min(20, Math.round(Number(scaleNumber.value) || 7)));
       var s = (v - 1) * 0.1 + 0.6;
       setScale(s, false, true);
     });
+    scaleNumber.addEventListener('pointerup', function () {
+      root.style.transition = '';
+      if (ipcRenderer) ipcRenderer.send('pet-scale-end', state.scale, state.h === 'left');
+      saveConfig(true);
+    });
     scaleNumber.addEventListener('change', function () {
       root.style.transition = '';
+      if (ipcRenderer) ipcRenderer.send('pet-scale-end', state.scale, state.h === 'left');
+      saveConfig(true);
+    });
+    scaleNumber.addEventListener('blur', function () {
+      if (ipcRenderer) ipcRenderer.send('pet-scale-end', state.scale, state.h === 'left');
       saveConfig(true);
     });
 
@@ -1035,6 +1061,7 @@
     }
 
     // Dynamic Scale Adjustment (Electron + Web responsive)
+    var scalingClassTimer = null;
     function setScale(v, fromRemote, fromNumberInput) {
       var next = Math.round(Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number(v))) * 10) / 10;
       state.scale = next;
@@ -1048,6 +1075,14 @@
 
       var pxW = Math.round(260 * next);
       var pxH = Math.round(360 * next);
+
+      root.classList.add('gpet-scaling');
+      if (scalingClassTimer) clearTimeout(scalingClassTimer);
+      scalingClassTimer = setTimeout(function () {
+        scalingClassTimer = null;
+        root.classList.remove('gpet-scaling');
+      }, 180);
+
       root.style.setProperty('--gpet-scale', String(next));
       root.style.setProperty('--gpet-base', pxW + 'px');
 
@@ -2025,6 +2060,7 @@
         if (data && (data.amount !== undefined || data.isLive)) {
           showCostBubble(data.amount, data.unit || 'tokens', !!data.isLive);
         }
+      });
       ipcRenderer.on('pet-apply-scale', function (e, s) {
         if (s !== undefined && Math.abs(Number(s) - state.scale) > 0.05) {
           setScale(s, true);

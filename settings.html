@@ -345,20 +345,56 @@
       saveAndBroadcast(false);
     }
 
+    let isScaleDragging = false;
+
+    scaleInput.addEventListener('pointerdown', () => {
+      isScaleDragging = true;
+      if (ipcRenderer) ipcRenderer.send('pet-scale-start');
+    });
     scaleInput.addEventListener('input', () => {
       applyScale(Number(scaleInput.value), false);
     });
+    scaleInput.addEventListener('pointerup', () => {
+      isScaleDragging = false;
+      if (ipcRenderer) ipcRenderer.send('pet-scale-end', cfg.scale);
+      saveAndBroadcast(true);
+    });
     scaleInput.addEventListener('change', () => {
+      isScaleDragging = false;
+      if (ipcRenderer) ipcRenderer.send('pet-scale-end', cfg.scale);
       saveAndBroadcast(true);
     });
 
+    scaleNumber.addEventListener('pointerdown', () => {
+      if (ipcRenderer) ipcRenderer.send('pet-scale-start');
+    });
+    scaleNumber.addEventListener('keydown', () => {
+      if (ipcRenderer) ipcRenderer.send('pet-scale-start');
+    });
     scaleNumber.addEventListener('input', () => {
       const v = Math.max(1, Math.min(20, Math.round(Number(scaleNumber.value) || 7)));
       const s = Math.round(((v - 1) * 0.1 + 0.6) * 10) / 10;
       applyScale(s, true);
     });
-    scaleNumber.addEventListener('change', () => {
+    scaleNumber.addEventListener('pointerup', () => {
+      if (ipcRenderer) ipcRenderer.send('pet-scale-end', cfg.scale);
       saveAndBroadcast(true);
+    });
+    scaleNumber.addEventListener('change', () => {
+      if (ipcRenderer) ipcRenderer.send('pet-scale-end', cfg.scale);
+      saveAndBroadcast(true);
+    });
+    scaleNumber.addEventListener('blur', () => {
+      if (ipcRenderer) ipcRenderer.send('pet-scale-end', cfg.scale);
+      saveAndBroadcast(true);
+    });
+
+    window.addEventListener('pointerup', () => {
+      if (isScaleDragging) {
+        isScaleDragging = false;
+        if (ipcRenderer) ipcRenderer.send('pet-scale-end', cfg.scale);
+        saveAndBroadcast(true);
+      }
     });
 
     soundSelect.addEventListener('change', () => {

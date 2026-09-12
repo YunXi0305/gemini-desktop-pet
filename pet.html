@@ -24,12 +24,15 @@
       bottom: 15px !important;
       left: auto !important;
       top: auto !important;
-      width: calc(100% - 30px) !important;
-      height: calc(100% - 30px) !important;
+      width: var(--gpet-base) !important;
+      height: calc(var(--gpet-base) * 1.385) !important;
     }
     .gpet-root.gpet-left {
       left: 15px !important;
       right: auto !important;
+    }
+    .gpet-scaling, .gpet-scaling * {
+      transition: none !important;
     }
   </style>
 </head>
